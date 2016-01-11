@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SSMonthView">
+        <attr name="day_height" format="dimension"/>
+        <attr name="draw_monthday" format="boolean"/>
+    </declare-styleable>
+</resources>
