@@ -4,21 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
     <TextView
         android:id="@+id/tvMonthTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        tools:text="yyyy-mm-dd"
         android:textSize="20sp"
         android:gravity="center"
         android:textColor="@color/c_33ccff"/>
 
     <com.tubb.calendarselector.library.SSMonthView
         android:id="@+id/ssMv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
         ss:draw_monthday="false"
         ss:day_size="@dimen/t_16"
         ss:firstDayOfWeek="saturday"

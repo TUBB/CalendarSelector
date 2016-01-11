@@ -247,21 +247,12 @@ public class SSMonthView extends View{
         }
     }
 
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if(widthAttr == ViewGroup.LayoutParams.WRAP_CONTENT){
-            mWidth = mDisplayMetrics.widthPixels;
-        }else{
-            mWidth = getMeasuredWidth();
-        }
 
-        if(heightAttr == ViewGroup.LayoutParams.WRAP_CONTENT){
-            mHeight = mWidth / COL_COUNT * realRowCount;
-        }else{
-            mHeight = getMeasuredHeight();
-        }
+        mWidth = getMeasurement(widthMeasureSpec, getMeasuredWidth());
+        mHeight = getMeasurement(heightMeasureSpec, getMeasuredHeight());
 
         mDayWidth = mWidth / COL_COUNT;
         mDayHeight = mHeight / realRowCount;
@@ -270,6 +261,23 @@ public class SSMonthView extends View{
         setMeasuredDimension(mWidth, mHeight);
     }
 
+    private int getMeasurement(int measureSpec, int contentSize) {
+        int specMode = View.MeasureSpec.getMode(measureSpec);
+        int specSize = View.MeasureSpec.getSize(measureSpec);
+        int resultSize = 0;
+        switch (specMode){
+            case MeasureSpec.EXACTLY:
+                resultSize = specSize;
+                break;
+            case MeasureSpec.AT_MOST:
+                resultSize = Math.min(specSize, contentSize);
+                break;
+            case MeasureSpec.UNSPECIFIED:
+                resultSize = contentSize;
+                break;
+        }
+        return resultSize;
+    }
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
