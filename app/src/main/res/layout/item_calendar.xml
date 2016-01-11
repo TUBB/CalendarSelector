@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        tools:text="2016-01"
         android:textSize="20sp"
         android:gravity="center"
         android:textColor="@color/c_33ccff"/>
@@ -20,9 +19,10 @@
         android:id="@+id/ssMv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        ss:draw_monthday="true"
+        ss:draw_monthday="false"
         ss:day_size="@dimen/t_16"
-        ss:month="2016-8"
+        ss:firstDayOfWeek="saturday"
+        ss:month="2016-4"
         ss:selected_days="1,2,15"
         />
 </LinearLayout>

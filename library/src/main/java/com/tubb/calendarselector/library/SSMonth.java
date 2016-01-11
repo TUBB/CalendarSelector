@@ -7,6 +7,9 @@ import java.util.LinkedHashSet;
  */
 public class SSMonth {
 
+    public static final int SUNDAY_OF_WEEK = 1;
+    public static final int MONDAY_OF_WEEK = 2;
+    public static final int SATURDAY_OF_WEEK = 7;
     protected int year;
     protected int month;
     protected Set<SSDay> selectedDays = new LinkedHashSet<>();
@@ -46,7 +49,6 @@ public class SSMonth {
         if (o == null || getClass() != o.getClass()) return false;
 
         SSMonth ssMonth = (SSMonth) o;
-
         if (year != ssMonth.year) return false;
         return month == ssMonth.month;
 
@@ -57,5 +59,10 @@ public class SSMonth {
         int result = year;
         result = 31 * result + month;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return year + "-" + month;
     }
 }

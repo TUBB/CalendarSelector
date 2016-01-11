@@ -7,6 +7,10 @@ import java.util.Calendar;
  */
 public class DateUtils {
 
+    private static final String[] SUNDAY_WEEKS = new String[]{"日", "一", "二", "三", "四", "五", "六"};
+    private static final String[] MONDAY_WEEKS = new String[]{"一", "二", "三", "四", "五", "六", "日"};
+    private static final String[] SATURDAY_WEEKS = new String[]{"六", "日", "一", "二", "三", "四", "五"};
+
     public static int getCurrentDay(){
         Calendar calendar = Calendar.getInstance();
         return calendar.get(Calendar.DAY_OF_MONTH);
@@ -22,6 +26,23 @@ public class DateUtils {
         return calendar.get(Calendar.YEAR);
     }
 
+    public static int mapDayOfWeekInMonth(int sundayPosition, int mappingWeek){
+        if(mappingWeek <= 0 || mappingWeek == SSMonth.SUNDAY_OF_WEEK) return sundayPosition;
+        else{
+            String sundayPositionDesc = SUNDAY_WEEKS[sundayPosition - 1];
+            if(mappingWeek == SSMonth.MONDAY_OF_WEEK){ // monday is the start day of a week
+                for (int i = 0; i < MONDAY_WEEKS.length; i++) {
+                    if(sundayPositionDesc.equals(MONDAY_WEEKS[i])) return i+1;
+                }
+            }else if(mappingWeek == SSMonth.SATURDAY_OF_WEEK){ // saturday is the start day of a week
+                for (int i = 0; i < SATURDAY_WEEKS.length; i++) {
+                    if(sundayPositionDesc.equals(SATURDAY_WEEKS[i])) return i+1;
+                }
+            }
+        }
+        return sundayPosition;
+    }
+
     /**
      * the first day of month
      * @param year
@@ -30,7 +51,6 @@ public class DateUtils {
      */
     public static int getDayOfWeekInMonth(int year, int month){
         Calendar calendar = Calendar.getInstance();
-        calendar.setFirstDayOfWeek(Calendar.SUNDAY);
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month-1);
         calendar.set(Calendar.DATE, 1);
@@ -73,5 +93,17 @@ public class DateUtils {
 
     public static boolean isToday(int year, int month, int day) {
         return year == getCurrentYear() && month == getCurrentMonth() && day == getCurrentDay();
+    }
+
+    public static int countDays(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay) {
+        Calendar startC = Calendar.getInstance();
+        startC.set(Calendar.YEAR, startYear);
+        startC.set(Calendar.MONTH, startMonth);
+        startC.set(Calendar.DAY_OF_MONTH, startDay);
+        Calendar endC = Calendar.getInstance();
+        endC.set(Calendar.YEAR, endYear);
+        endC.set(Calendar.MONTH, endMonth);
+        endC.set(Calendar.DAY_OF_MONTH, endDay);
+        return (int) ((endC.getTimeInMillis() - startC.getTimeInMillis()) / 86400000 + 1);
     }
 }

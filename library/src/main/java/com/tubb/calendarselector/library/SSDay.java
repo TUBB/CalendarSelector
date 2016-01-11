@@ -10,9 +10,9 @@ public class SSDay {
     public static final int CURRENT_MONTH_DAY = 2;
     public static final int NEXT_MONTH_DAY = 3;
 
-    private int dayType;
-    private SSMonth ssMonth;
-    private int day;
+    protected int dayType;
+    protected SSMonth ssMonth;
+    protected int day;
 
     public SSDay(int dayType, SSMonth ssMonth, int day) {
         this.dayType = dayType;

@@ -44,6 +44,7 @@ public class SSMonthView extends View{
     private int selectedDayColor;
     private int selectedDayCircleColor;
     private int daySize;
+    private int firstDayOfWeek;
     private OnMonthDayClickListener mMonthDayClickListener;
 
     private List<List<SSDay>> mMonthDays;
@@ -57,7 +58,7 @@ public class SSMonthView extends View{
 
     public SSMonthView(Context context) {
         super(context);
-        throw new RuntimeException("Can't use this constructor ( MonthView(Context context) )");
+        throw new RuntimeException("You could't use this constructor ( MonthView(Context context) )");
     }
 
     public SSMonthView(Context context, AttributeSet attrs) {
@@ -76,6 +77,7 @@ public class SSMonthView extends View{
         selectedDayColor = a.getColor(R.styleable.SSMonthView_selectedday_color, ContextCompat.getColor(mContext, R.color.c_ffffff));
         selectedDayCircleColor = a.getColor(R.styleable.SSMonthView_selectedday_circle_color, ContextCompat.getColor(mContext, R.color.c_33ccff));
         daySize = a.getDimensionPixelSize(R.styleable.SSMonthView_day_size, getResources().getDimensionPixelSize(R.dimen.t_16));
+        firstDayOfWeek = a.getInt(R.styleable.SSMonthView_firstDayOfWeek, SSMonth.SUNDAY_OF_WEEK);
         if(isInEditMode()){
             String testMonth = a.getString(R.styleable.SSMonthView_month);
             String selectedDays = a.getString(R.styleable.SSMonthView_selected_days);
@@ -124,7 +126,8 @@ public class SSMonthView extends View{
         int dayCountOfPrevMonth = DateUtils.getDayCountOfMonth(prevMonth.getYear(), prevMonth.getMonth());
         SSMonth nextMonth = DateUtils.nextMonth(ssMonth.getYear(), ssMonth.getMonth());
 
-        int dayOfWeekInMonth = DateUtils.getDayOfWeekInMonth(ssMonth.getYear(), ssMonth.getMonth());
+        int dayOfWeekInMonth = DateUtils.mapDayOfWeekInMonth(DateUtils.getDayOfWeekInMonth(ssMonth.getYear(), ssMonth.getMonth()), firstDayOfWeek);
+        Log.d(TAG, ssMonth.toString()+" dayOfWeekInMonth:"+dayOfWeekInMonth);
         int dayCountOfMonth = DateUtils.getDayCountOfMonth(ssMonth.getYear(), ssMonth.getMonth());
 
         mMonthDays = new ArrayList<>(ROW_COUNT);
@@ -136,7 +139,8 @@ public class SSMonthView extends View{
             ArrayList<SSDay> days = new ArrayList<>(COL_COUNT);
             for (int col = 1; col <= COL_COUNT; col++){
                 int monthPosition = col + row * COL_COUNT;
-                if(monthPosition >= dayOfWeekInMonth && monthPosition < dayOfWeekInMonth + dayCountOfMonth){ // current month
+                if(monthPosition >= dayOfWeekInMonth
+                        && monthPosition < dayOfWeekInMonth + dayCountOfMonth){ // current month
                     SSDay currentMonthDay = new SSDay(SSDay.CURRENT_MONTH_DAY, ssMonth, day);
                     if(DateUtils.isToday(ssMonth.getYear(), ssMonth.getMonth(), day)){
                         currentMonthDay.setDayType(SSDay.TODAY);
@@ -149,7 +153,8 @@ public class SSMonthView extends View{
                     SSDay prevMonthDay = new SSDay(SSDay.PRE_MONTH_DAY, prevMonth, prevDay);
                     days.add(prevMonthDay);
                 }else if(monthPosition >= dayOfWeekInMonth + dayCountOfMonth){ // next month
-                    SSDay nextMonthDay = new SSDay(SSDay.NEXT_MONTH_DAY, nextMonth, monthPosition - (dayOfWeekInMonth + dayCountOfMonth) + 1);
+                    SSDay nextMonthDay = new SSDay(SSDay.NEXT_MONTH_DAY, nextMonth,
+                            monthPosition - (dayOfWeekInMonth + dayCountOfMonth) + 1);
                     days.add(nextMonthDay);
                 }
             }
@@ -160,8 +165,7 @@ public class SSMonthView extends View{
         if(mDrawMonthDay) {
             if(realRowCount != realRow) neededLayout = true;
             realRowCount = realRow;
-        }
-        else{
+        } else{
             // adjust display
             if(dayOfWeekInMonth == 1
                     && (realRow == (ROW_COUNT - 1) || realRow == (ROW_COUNT - 2))
@@ -190,7 +194,10 @@ public class SSMonthView extends View{
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if(mWidth == 0 || mHeight == 0 || this.ssMonth == null) return;
+        if(mWidth == 0 || mHeight == 0)
+            throw new RuntimeException("the month view width or height is not correct");
+        if(this.ssMonth == null)
+            throw new RuntimeException("the ssMonth property must be set");
         for (int row = 0; row < mMonthDays.size(); row++){
             List<SSDay> ssDays = mMonthDays.get(row);
             for (int col = 0; col < ssDays.size(); col++){

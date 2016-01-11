@@ -25,4 +25,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:'+rootProject.appcompatVersion
     compile 'com.android.support:design:23.1.1'
+    compile 'com.tubb.smrv:swipemenu-recyclerview:3.0.6'
 }

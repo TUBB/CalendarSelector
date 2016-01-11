@@ -9,11 +9,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.tubb.calendarselector.library.DateUtils;
 import com.tubb.calendarselector.library.SSDay;
 import com.tubb.calendarselector.library.SSMonth;
 import com.tubb.calendarselector.library.SSMonthDayProcessor;
 import com.tubb.calendarselector.library.SSMonthView;
+import com.tubb.calendarselector.library.SegmentSelectListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,22 +35,48 @@ public class ScrollingActivity extends AppCompatActivity {
         RecyclerView rvCalendar = (RecyclerView) findViewById(R.id.rvCalendar);
         rvCalendar.setLayoutManager(new LinearLayoutManager(this));
         final List<SSMonth> data = getData();
-//        processor = new SSMonthDayProcessor(rvCalendar, data, new SSMonthDayProcessor.IntervalSelectListener() {
+
+//        processor = new SSMonthDayProcessor(rvCalendar, data, new IntervalSelectListener() {
 //            @Override
-//            public void onIntervalSelect(SSDay day) {
-//                Log.d(TAG, "interval select day " + day.toString());
+//            public void onIntervalSelect(List<SSDay> selectedDays) {
+//                Log.d(TAG, "interval selected days " + selectedDays.toString());
 //            }
 //
 //            @Override
-//            public void onIntervalUnSelect(SSDay day) {
-//                Log.d(TAG, "interval unselect day " + day.toString());
+//            public boolean onInterceptSelect(List<SSDay> selectedDays, SSDay selectingDay) {
+//                if(selectedDays.size() >= 5) {
+//                    Toast.makeText(ScrollingActivity.this, "Selected days can't more than 5", Toast.LENGTH_LONG).show();
+//                    return true;
+//                }
+//                return super.onInterceptSelect(selectedDays, selectingDay);
 //            }
 //        });
 
-        processor = new SSMonthDayProcessor(rvCalendar, data, new SSMonthDayProcessor.SegmentSelectListener() {
+        processor = new SSMonthDayProcessor(rvCalendar, data, new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(SSDay startDay, SSDay endDay) {
                 Log.d(TAG, "segment select " + startDay.toString() + " : " + endDay.toString());
+            }
+
+            @Override
+            public boolean onInterceptSelect(SSDay selectingDay) {
+                if(DateUtils.isToday(selectingDay.getSsMonth().getYear(), selectingDay.getSsMonth().getMonth(), selectingDay.getDay())){
+                    Toast.makeText(ScrollingActivity.this, "Today can't be selected", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+                return super.onInterceptSelect(selectingDay);
+            }
+
+            @Override
+            public boolean onInterceptSelect(SSDay startDay, SSDay endDay) {
+                int differDays = DateUtils.countDays(startDay.getSsMonth().getYear(), startDay.getSsMonth().getMonth(), startDay.getDay(),
+                        endDay.getSsMonth().getYear(), endDay.getSsMonth().getMonth(), endDay.getDay());
+                Log.d(TAG, "differDays " + differDays);
+                if(differDays > 5) {
+                    Toast.makeText(ScrollingActivity.this, "Selected days can't more than 5", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+                return super.onInterceptSelect(startDay, endDay);
             }
         });
         rvCalendar.setAdapter(new CalendarAdpater(data));
@@ -62,6 +91,7 @@ public class ScrollingActivity extends AppCompatActivity {
             data.add(new SSMonth(2017, i));
         }
         return data;
+
     }
 
     class CalendarAdpater extends RecyclerView.Adapter<CalendarViewHolder>{

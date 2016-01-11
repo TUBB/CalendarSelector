@@ -3,7 +3,7 @@ package com.tubb.calendarselector.library;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +17,7 @@ public class SSMonthDayProcessor {
     private RecyclerView recyclerView;
     private SelectedRecord startSelectedRecord = new SelectedRecord();
     private SelectedRecord endSelectedRecord = new SelectedRecord();
+    private List<SSDay> sDays = new LinkedList<>();
     private List<SSMonth> dataList;
     private IntervalSelectListener intervalSelectListener;
     private SegmentSelectListener segmentSelectListener;
@@ -39,10 +40,10 @@ public class SSMonthDayProcessor {
         ssMonthView.setMonthDayClickListener(new SSMonthView.OnMonthDayClickListener() {
             @Override
             public void onMonthDayClick(SSDay ssDay) {
-                if(ssDay.getDayType() != SSDay.CURRENT_MONTH_DAY) return;
+                if(!(ssDay.getDayType() == SSDay.CURRENT_MONTH_DAY || ssDay.getDayType() == SSDay.TODAY)) return;
                 switch (mode){
                     case INTERVAL:
-                        multiSelect(ssMonthView, ssDay);
+                        intervalSelect(ssMonthView, ssDay);
                         break;
                     case SEGMENT:
                         segmentSelect(ssMonthView, ssDay, viewHolder);
@@ -53,35 +54,42 @@ public class SSMonthDayProcessor {
     }
 
     private void segmentSelect(SSMonthView ssMonthView, SSDay ssDay, RecyclerView.ViewHolder viewHolder) {
-        if(!startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){
+        if(segmentSelectListener.onInterceptSelect(ssDay)) return;
+
+        if(!startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){ // init status
             startSelectedRecord.position = viewHolder.getAdapterPosition();
             startSelectedRecord.day = ssDay;
             ssMonthView.getSsMonth().addSelectedDay(ssDay);
             invalidate(viewHolder);
-        }else if(startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){
+        }else if(startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){ // start day is ok, but end day not
             if(startSelectedRecord.position < viewHolder.getAdapterPosition()){ // click later month
+                if(segmentSelectListener.onInterceptSelect(startSelectedRecord.day, ssDay)) return;
                 endSelectedRecord.position = viewHolder.getAdapterPosition();
                 endSelectedRecord.day = ssDay;
                 segmentMonthSelected();
             }else if(startSelectedRecord.position > viewHolder.getAdapterPosition()){ // click before month
+                if(segmentSelectListener.onInterceptSelect(ssDay, startSelectedRecord.day)) return;
                 endSelectedRecord.position = startSelectedRecord.position;
                 endSelectedRecord.day = startSelectedRecord.day;
                 startSelectedRecord.position = viewHolder.getAdapterPosition();
                 startSelectedRecord.day = ssDay;
                 segmentMonthSelected();
             }else{ // click the same month
-
                 SSMonth ssMonth = startSelectedRecord.day.getSsMonth();
                 if(startSelectedRecord.day.getDay() != ssDay.getDay()){
                     if(startSelectedRecord.day.getDay() < ssDay.getDay()){
+                        if(segmentSelectListener.onInterceptSelect(startSelectedRecord.day, ssDay)) return;
                         for (int day = startSelectedRecord.day.getDay(); day <= ssDay.getDay(); day++){
-                            ssMonth.addSelectedDay(new SSDay(DateUtils.isToday(ssMonth.getYear(), ssMonth.getMonth(), day)?SSDay.TODAY:SSDay.CURRENT_MONTH_DAY, ssMonth, day));
+                            ssMonth.addSelectedDay(new SSDay(DateUtils.isToday(ssMonth.getYear(),
+                                    ssMonth.getMonth(), day) ?SSDay.TODAY:SSDay.CURRENT_MONTH_DAY, ssMonth, day));
                         }
                         endSelectedRecord.position = viewHolder.getAdapterPosition();
                         endSelectedRecord.day = ssDay;
                     }else if(startSelectedRecord.day.getDay() > ssDay.getDay()){
+                        if(segmentSelectListener.onInterceptSelect(ssDay, startSelectedRecord.day)) return;
                         for (int day = ssDay.getDay(); day <= startSelectedRecord.day.getDay(); day++){
-                            ssMonth.addSelectedDay(new SSDay(DateUtils.isToday(ssMonth.getYear(), ssMonth.getMonth(), day)?SSDay.TODAY:SSDay.CURRENT_MONTH_DAY, ssMonth, day));
+                            ssMonth.addSelectedDay(new SSDay(DateUtils.isToday(ssMonth.getYear(),
+                                    ssMonth.getMonth(), day)?SSDay.TODAY:SSDay.CURRENT_MONTH_DAY, ssMonth, day));
                         }
                         endSelectedRecord.position = viewHolder.getAdapterPosition();
                         endSelectedRecord.day = startSelectedRecord.day;
@@ -97,12 +105,9 @@ public class SSMonthDayProcessor {
                     startSelectedRecord.reset();
                     endSelectedRecord.reset();
                 }
-
-
             }
 
-        }else if(startSelectedRecord.isRecord() && endSelectedRecord.isRecord()){
-
+        }else if(startSelectedRecord.isRecord() && endSelectedRecord.isRecord()){ // start day and end day is ok
             startSelectedRecord.day.getSsMonth().getSelectedDays().clear();
             RecyclerView.ViewHolder startViewHolder = recyclerView.findViewHolderForAdapterPosition(startSelectedRecord.position);
             invalidate(startViewHolder);
@@ -125,7 +130,8 @@ public class SSMonthDayProcessor {
 
             startSelectedRecord.position = viewHolder.getAdapterPosition();
             startSelectedRecord.day = ssDay;
-            startSelectedRecord.day.getSsMonth().addSelectedDay(new SSDay(SSDay.CURRENT_MONTH_DAY, startSelectedRecord.day.getSsMonth(), ssDay.getDay()));
+            startSelectedRecord.day.getSsMonth().addSelectedDay(new SSDay(SSDay.CURRENT_MONTH_DAY,
+                    startSelectedRecord.day.getSsMonth(), ssDay.getDay()));
             invalidate(viewHolder);
 
             endSelectedRecord.reset();
@@ -143,6 +149,7 @@ public class SSMonthDayProcessor {
     }
 
     private void segmentMonthSelected() {
+
         SSMonth startMonth = startSelectedRecord.day.getSsMonth();
         int startSelectedMonthDayCount = DateUtils.getDayCountOfMonth(startMonth.getYear(), startMonth.getMonth());
         for (int day = startSelectedRecord.day.getDay(); day <= startSelectedMonthDayCount; day++){
@@ -150,7 +157,6 @@ public class SSMonthDayProcessor {
         }
         RecyclerView.ViewHolder startViewHolder = recyclerView.findViewHolderForAdapterPosition(startSelectedRecord.position);
         if(startViewHolder != null) invalidate(startViewHolder);
-
 
         int startSelectedPosition = startSelectedRecord.position;
         int endSelectedPosition = endSelectedRecord.position;
@@ -177,16 +183,26 @@ public class SSMonthDayProcessor {
         segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
     }
 
-    private void multiSelect(SSMonthView ssMonthView, SSDay ssDay) {
+    private void intervalSelect(SSMonthView ssMonthView, SSDay ssDay) {
+        if(intervalSelectListener.onInterceptSelect(sDays, ssDay)) return;
         Set<SSDay> selectedDays = ssDay.getSsMonth().getSelectedDays();
         if(selectedDays.contains(ssDay)) {
             selectedDays.remove(ssDay);
-            intervalSelectListener.onIntervalUnSelect(ssDay);
+            sDays.remove(ssDay);
         } else {
             selectedDays.add(ssDay);
-            intervalSelectListener.onIntervalSelect(ssDay);
+            sDays.add(ssDay);
         }
+        intervalSelectListener.onIntervalSelect(sDays);
         ssMonthView.invalidate();
+    }
+
+    public SSDay getStartDay(){
+        return startSelectedRecord.day;
+    }
+
+    public SSDay getEndDay(){
+        return endSelectedRecord.day;
     }
 
     public static class SelectedRecord{
@@ -208,12 +224,4 @@ public class SSMonthDayProcessor {
         SEGMENT
     }
 
-    public interface IntervalSelectListener{
-        void onIntervalSelect(SSDay day);
-        void onIntervalUnSelect(SSDay day);
-    }
-
-    public interface SegmentSelectListener{
-        void onSegmentSelect(SSDay startDay, SSDay endDay);
-    }
 }
