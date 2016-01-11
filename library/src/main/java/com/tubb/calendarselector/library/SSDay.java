@@ -45,6 +45,27 @@ public class SSDay {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SSDay ssDay = (SSDay) o;
+
+        if (dayType != ssDay.dayType) return false;
+        if (day != ssDay.day) return false;
+        return ssMonth.equals(ssDay.ssMonth);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dayType;
+        result = 31 * result + ssMonth.hashCode();
+        result = 31 * result + day;
+        return result;
+    }
+
+    @Override
     public String toString() {
         return ssMonth.getYear()+"-"+ssMonth.getMonth()+"-"+day;
     }

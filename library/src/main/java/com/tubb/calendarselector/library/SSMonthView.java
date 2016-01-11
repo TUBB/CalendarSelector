@@ -3,6 +3,7 @@ package com.tubb.calendarselector.library;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -14,7 +15,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -29,6 +29,7 @@ public class SSMonthView extends View{
 
     private boolean mDrawMonthDay = false;
     private int realRowCount = ROW_COUNT;
+    private boolean neededLayout = false;
     protected Context mContext;
     protected DisplayMetrics mDisplayMetrics;
     private int widthAttr;
@@ -36,6 +37,14 @@ public class SSMonthView extends View{
     private float mDownX;
     private float mDownY;
     private int mTouchSlop;
+    private int todayColor;
+    private int prevMonthDayColor;
+    private int nextMonthDayColor;
+    private int normalDayColor;
+    private int selectedDayColor;
+    private int selectedDayCircleColor;
+    private int daySize;
+    private OnMonthDayClickListener mMonthDayClickListener;
 
     private List<List<SSDay>> mMonthDays;
     private SSDayDrawer dayDrawer;
@@ -57,25 +66,56 @@ public class SSMonthView extends View{
 
     public SSMonthView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mContext = context;
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SSMonthView, 0, defStyleAttr);
         mDrawMonthDay = a.getBoolean(R.styleable.SSMonthView_draw_monthday, false);
+        todayColor = a.getColor(R.styleable.SSMonthView_today_color, ContextCompat.getColor(mContext, R.color.c_ff6666));
+        prevMonthDayColor = a.getColor(R.styleable.SSMonthView_prevmonthday_color, ContextCompat.getColor(mContext, R.color.c_999999));
+        nextMonthDayColor = a.getColor(R.styleable.SSMonthView_nextmonthday_color, ContextCompat.getColor(mContext, R.color.c_999999));
+        normalDayColor = a.getColor(R.styleable.SSMonthView_normalday_color, ContextCompat.getColor(mContext, R.color.c_000000));
+        selectedDayColor = a.getColor(R.styleable.SSMonthView_selectedday_color, ContextCompat.getColor(mContext, R.color.c_ffffff));
+        selectedDayCircleColor = a.getColor(R.styleable.SSMonthView_selectedday_circle_color, ContextCompat.getColor(mContext, R.color.c_33ccff));
+        daySize = a.getDimensionPixelSize(R.styleable.SSMonthView_day_size, getResources().getDimensionPixelSize(R.dimen.t_16));
+        if(isInEditMode()){
+            String testMonth = a.getString(R.styleable.SSMonthView_month);
+            String selectedDays = a.getString(R.styleable.SSMonthView_selected_days);
+            initEditorMode(testMonth, selectedDays);
+        }
         a.recycle();
-        mContext = context;
-        if(isInEditMode())
-            initEditorMode();
-        dayDrawer = CalendarSelector.getInstance().getConfiguration().getSsDayDrawer();
         mDisplayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(mDisplayMetrics);
         mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        dayDrawer = new DefaultSSDayDrawer(mContext);
+        dayDrawer.init(this);
     }
 
-    public void setSsMonth(int year, int month){
-        if(year <=0 || month <=0 || month > 12)
-            throw new IllegalArgumentException("Invalidate year or month");
-        this.ssMonth = new SSMonth(year, month);
-        calculateDays();
+    public void setDayDrawer(SSDayDrawer dayDrawer) {
+        this.dayDrawer = dayDrawer;
+        this.dayDrawer.init(this);
         invalidate();
+    }
+
+    /**
+     * set the month
+     * @param ssMonth month obj
+     */
+    public void setSsMonth(SSMonth ssMonth){
+        if(ssMonth.getYear() <=0 || ssMonth.getMonth() <=0 || ssMonth.getMonth() > 12)
+            throw new IllegalArgumentException("Invalidate year or month");
+        this.ssMonth = ssMonth;
+        calculateDays();
+        if(neededLayout) requestLayout();
+        else invalidate();
+        neededLayout = false;
+    }
+
+    public SSMonth getSsMonth() {
+        return ssMonth;
+    }
+
+    public void setMonthDayClickListener(OnMonthDayClickListener monthDayClickListener) {
+        mMonthDayClickListener = monthDayClickListener;
     }
 
     private void calculateDays() {
@@ -96,7 +136,7 @@ public class SSMonthView extends View{
             ArrayList<SSDay> days = new ArrayList<>(COL_COUNT);
             for (int col = 1; col <= COL_COUNT; col++){
                 int monthPosition = col + row * COL_COUNT;
-                if(monthPosition >= dayOfWeekInMonth && monthPosition < dayOfWeekInMonth + dayCountOfMonth){ // 本月
+                if(monthPosition >= dayOfWeekInMonth && monthPosition < dayOfWeekInMonth + dayCountOfMonth){ // current month
                     SSDay currentMonthDay = new SSDay(SSDay.CURRENT_MONTH_DAY, ssMonth, day);
                     if(DateUtils.isToday(ssMonth.getYear(), ssMonth.getMonth(), day)){
                         currentMonthDay.setDayType(SSDay.TODAY);
@@ -104,11 +144,11 @@ public class SSMonthView extends View{
                     days.add(currentMonthDay);
                     day++;
                     isAllRowEmpty = false;
-                }else if(monthPosition < dayOfWeekInMonth){ // 上月
+                }else if(monthPosition < dayOfWeekInMonth){ // prev month
                     int prevDay = dayCountOfPrevMonth - (dayOfWeekInMonth - 1 - monthPosition);
                     SSDay prevMonthDay = new SSDay(SSDay.PRE_MONTH_DAY, prevMonth, prevDay);
                     days.add(prevMonthDay);
-                }else if(monthPosition >= dayOfWeekInMonth + dayCountOfMonth){ // 下月
+                }else if(monthPosition >= dayOfWeekInMonth + dayCountOfMonth){ // next month
                     SSDay nextMonthDay = new SSDay(SSDay.NEXT_MONTH_DAY, nextMonth, monthPosition - (dayOfWeekInMonth + dayCountOfMonth) + 1);
                     days.add(nextMonthDay);
                 }
@@ -117,7 +157,10 @@ public class SSMonthView extends View{
             if(!isAllRowEmpty) realRow++;
         }
 
-        if(mDrawMonthDay) realRowCount = realRow;
+        if(mDrawMonthDay) {
+            if(realRowCount != realRow) neededLayout = true;
+            realRowCount = realRow;
+        }
         else{
             // adjust display
             if(dayOfWeekInMonth == 1
@@ -134,8 +177,7 @@ public class SSMonthView extends View{
                 mMonthDays.add(0, ssDays);
             }
         }
-        Log.d(TAG, "realRowCount:"+realRowCount);
-
+//        Log.d(TAG, ssMonth.getYear()+"-"+ssMonth.getMonth()+" realRowCount:"+realRowCount);
     }
 
     private boolean isFirstRowFullCurrentMonthDays() {
@@ -191,7 +233,7 @@ public class SSMonthView extends View{
             List<SSDay> ssDays = mMonthDays.get(row);
             if(ssDays != null && ssDays.size() > 0){
                 SSDay ssDay = ssDays.get(col);
-                dayDrawer.onDayClick(ssDay, this);
+                if(mMonthDayClickListener != null) mMonthDayClickListener.onMonthDayClick(ssDay);
             }else{
                 Log.d(TAG, "Not found the row's days");
             }
@@ -216,8 +258,8 @@ public class SSMonthView extends View{
 
         mDayWidth = mWidth / COL_COUNT;
         mDayHeight = mHeight / realRowCount;
-
-        Log.d(TAG, "mWidth:"+mWidth+" mHeight:"+mHeight+" mDayWidth:"+mDayWidth+" mDayHeight:"+mDayHeight);
+//        Log.d(TAG, ssMonth.getYear()+"-"+ssMonth.getMonth()+" onMeasure");
+//        Log.d(TAG, "mWidth:"+mWidth+" mHeight:"+mHeight+" mDayWidth:"+mDayWidth+" mDayHeight:"+mDayHeight);
         setMeasuredDimension(mWidth, mHeight);
     }
 
@@ -228,18 +270,54 @@ public class SSMonthView extends View{
         heightAttr = getLayoutParams().height;
     }
 
-    private void initEditorMode(){
-        if(getTag() != null && !TextUtils.isEmpty(String.valueOf(getTag()))){
-            String tag = String.valueOf(getTag());
-            String[] ym = tag.split("-");
+    private void initEditorMode(String testMonth, String selectedDays){
+        SSMonth ssMonth;
+        if(!TextUtils.isEmpty(testMonth)){
+            String[] ym = testMonth.split("-");
             int year = Integer.parseInt(ym[0]);
             int month = Integer.parseInt(ym[1]);
-            CalendarSelector.getInstance().init(new CalendarSelectorConfiguration.Builder(mContext.getApplicationContext()).ssDayDrawer(new DefaultSSDayDrawer(mContext.getApplicationContext())).build());
-            setSsMonth(year, month);
+            ssMonth = new SSMonth(year, month);
         }else{
-            CalendarSelector.getInstance().init(new CalendarSelectorConfiguration.Builder(mContext.getApplicationContext()).ssDayDrawer(new DefaultSSDayDrawer(mContext.getApplicationContext())).build());
-            setSsMonth(DateUtils.getCurrentYear(), DateUtils.getCurrentMonth());
+            ssMonth = new SSMonth(DateUtils.getCurrentYear(), DateUtils.getCurrentMonth());
         }
+        if(!TextUtils.isEmpty(selectedDays)){
+            String[] days = selectedDays.split(",");
+            for (String day:days){
+                ssMonth.addSelectedDay(new SSDay(SSDay.CURRENT_MONTH_DAY, ssMonth, Integer.parseInt(day)));
+            }
+        }
+        setSsMonth(ssMonth);
     }
 
+    public int getNormalDayColor() {
+        return normalDayColor;
+    }
+
+    public int getPrevMonthDayColor() {
+        return prevMonthDayColor;
+    }
+
+    public int getNextMonthDayColor() {
+        return nextMonthDayColor;
+    }
+
+    public int getTodayColor() {
+        return todayColor;
+    }
+
+    public int getDaySize() {
+        return daySize;
+    }
+
+    public int getSelectedDayColor() {
+        return selectedDayColor;
+    }
+
+    public int getSelectedDayCircleColor() {
+        return selectedDayCircleColor;
+    }
+
+    public interface OnMonthDayClickListener{
+        void onMonthDayClick(SSDay ssDay);
+    }
 }

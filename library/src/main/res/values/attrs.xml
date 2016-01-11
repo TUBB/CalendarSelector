@@ -3,5 +3,14 @@
     <declare-styleable name="SSMonthView">
         <attr name="day_height" format="dimension"/>
         <attr name="draw_monthday" format="boolean"/>
+        <attr name="normalday_color" format="color"/>
+        <attr name="prevmonthday_color" format="color"/>
+        <attr name="today_color" format="color"/>
+        <attr name="nextmonthday_color" format="color"/>
+        <attr name="selectedday_color" format="color"/>
+        <attr name="selectedday_circle_color" format="color"/>
+        <attr name="day_size" format="dimension"/>
+        <attr name="selected_days" format="string"/>
+        <attr name="month" format="string"/>
     </declare-styleable>
 </resources>

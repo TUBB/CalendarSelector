@@ -8,12 +8,10 @@
     tools:context="com.tubb.calendarselector.ScrollingActivity"
     >
 
-    <com.tubb.calendarselector.library.SSMonthView
-        android:id="@+id/ssMv"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvCalendar"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        ss:draw_monthday="false"
-        android:background="@color/c_33ccff"
-        android:tag="2016-9"
+        android:layout_height="match_parent"
         />
+
 </FrameLayout>

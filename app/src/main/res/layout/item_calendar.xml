@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ss="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvMonthTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        tools:text="2016-01"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:textColor="@color/c_33ccff"/>
+
+    <com.tubb.calendarselector.library.SSMonthView
+        android:id="@+id/ssMv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        ss:draw_monthday="true"
+        ss:day_size="@dimen/t_16"
+        ss:month="2016-8"
+        ss:selected_days="1,2,15"
+        />
+</LinearLayout>
