@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ss="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".CalendarActivity"
+    android:orientation="vertical"
     >
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvCalendar"
+    <com.tubb.calendarselector.library.SSMonthView
+        android:id="@+id/ssMv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="250dp" />
 
-</FrameLayout>
+</LinearLayout>

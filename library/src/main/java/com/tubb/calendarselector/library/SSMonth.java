@@ -1,18 +1,23 @@
 package com.tubb.calendarselector.library;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.LinkedHashSet;
 /**
  * Created by tubingbing on 16/1/19.
  */
-public class SSMonth {
+public class SSMonth implements Parcelable {
 
     public static final int SUNDAY_OF_WEEK = 1;
     public static final int MONDAY_OF_WEEK = 2;
     public static final int SATURDAY_OF_WEEK = 7;
     protected int year;
     protected int month;
-    protected Set<SSDay> selectedDays = new LinkedHashSet<>();
+    protected List<SSDay> selectedDays = new ArrayList<>(5);
 
     public SSMonth(int year, int month){
         this.year = year;
@@ -35,7 +40,11 @@ public class SSMonth {
         return year;
     }
 
-    public Set<SSDay> getSelectedDays() {
+    public void setSelectedDays(List<SSDay> selectedDays) {
+        this.selectedDays = selectedDays;
+    }
+
+    public List<SSDay> getSelectedDays() {
         return selectedDays;
     }
 
@@ -65,4 +74,32 @@ public class SSMonth {
     public String toString() {
         return year + "-" + month;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.year);
+        dest.writeInt(this.month);
+        dest.writeTypedList(selectedDays);
+    }
+
+    protected SSMonth(Parcel in) {
+        this.year = in.readInt();
+        this.month = in.readInt();
+        this.selectedDays = in.createTypedArrayList(SSDay.CREATOR);
+    }
+
+    public static final Parcelable.Creator<SSMonth> CREATOR = new Parcelable.Creator<SSMonth>() {
+        public SSMonth createFromParcel(Parcel source) {
+            return new SSMonth(source);
+        }
+
+        public SSMonth[] newArray(int size) {
+            return new SSMonth[size];
+        }
+    };
 }

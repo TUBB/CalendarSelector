@@ -1,9 +1,12 @@
 package com.tubb.calendarselector.library;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by tubingbing on 16/1/19.
  */
-public class SSDay {
+public class SSDay implements Parcelable {
 
     public static final int PRE_MONTH_DAY = 0;
     public static final int TODAY = 1;
@@ -69,4 +72,33 @@ public class SSDay {
     public String toString() {
         return ssMonth.getYear()+"-"+ssMonth.getMonth()+"-"+day;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.dayType);
+        dest.writeParcelable(this.ssMonth, flags);
+        dest.writeInt(this.day);
+    }
+
+    protected SSDay(Parcel in) {
+        this.dayType = in.readInt();
+        this.ssMonth = in.readParcelable(SSMonth.class.getClassLoader());
+        this.day = in.readInt();
+    }
+
+    public static final Parcelable.Creator<SSDay> CREATOR = new Parcelable.Creator<SSDay>() {
+        public SSDay createFromParcel(Parcel source) {
+            return new SSDay(source);
+        }
+
+        public SSDay[] newArray(int size) {
+            return new SSDay[size];
+        }
+    };
 }

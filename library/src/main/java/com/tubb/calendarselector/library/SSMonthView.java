@@ -3,6 +3,8 @@ package com.tubb.calendarselector.library;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -11,11 +13,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by tubingbing on 16/1/18.
@@ -32,8 +34,6 @@ public class SSMonthView extends View{
     private boolean neededLayout = false;
     protected Context mContext;
     protected DisplayMetrics mDisplayMetrics;
-    private int widthAttr;
-    private int heightAttr;
     private float mDownX;
     private float mDownY;
     private int mTouchSlop;
@@ -67,6 +67,7 @@ public class SSMonthView extends View{
 
     public SSMonthView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setSaveEnabled(true);
         mContext = context;
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SSMonthView, 0, defStyleAttr);
         mDrawMonthDay = a.getBoolean(R.styleable.SSMonthView_draw_monthday, false);
@@ -92,10 +93,19 @@ public class SSMonthView extends View{
         dayDrawer.init(this);
     }
 
-    public void setDayDrawer(SSDayDrawer dayDrawer) {
-        this.dayDrawer = dayDrawer;
-        this.dayDrawer.init(this);
-        invalidate();
+    public void setSsMonth(SSMonth ssMonth, SSDayDrawer dayDrawer){
+        if(ssMonth.getYear() <=0 || ssMonth.getMonth() <=0 || ssMonth.getMonth() > 12)
+            throw new IllegalArgumentException("Invalidate year or month");
+        if(dayDrawer != null){
+            this.dayDrawer = dayDrawer;
+            this.dayDrawer.init(this);
+        }
+        this.ssMonth = ssMonth;
+        if(mMonthDays == null)
+            calculateDays();
+        if(neededLayout) requestLayout();
+        else invalidate();
+        neededLayout = false;
     }
 
     /**
@@ -103,13 +113,7 @@ public class SSMonthView extends View{
      * @param ssMonth month obj
      */
     public void setSsMonth(SSMonth ssMonth){
-        if(ssMonth.getYear() <=0 || ssMonth.getMonth() <=0 || ssMonth.getMonth() > 12)
-            throw new IllegalArgumentException("Invalidate year or month");
-        this.ssMonth = ssMonth;
-        calculateDays();
-        if(neededLayout) requestLayout();
-        else invalidate();
-        neededLayout = false;
+        this.setSsMonth(ssMonth, null);
     }
 
     public SSMonth getSsMonth() {
@@ -127,7 +131,7 @@ public class SSMonthView extends View{
         SSMonth nextMonth = DateUtils.nextMonth(ssMonth.getYear(), ssMonth.getMonth());
 
         int dayOfWeekInMonth = DateUtils.mapDayOfWeekInMonth(DateUtils.getDayOfWeekInMonth(ssMonth.getYear(), ssMonth.getMonth()), firstDayOfWeek);
-        Log.d(TAG, ssMonth.toString()+" dayOfWeekInMonth:"+dayOfWeekInMonth);
+//        Log.d(TAG, ssMonth.toString()+" dayOfWeekInMonth:"+dayOfWeekInMonth);
         int dayCountOfMonth = DateUtils.getDayCountOfMonth(ssMonth.getYear(), ssMonth.getMonth());
 
         mMonthDays = new ArrayList<>(ROW_COUNT);
@@ -278,12 +282,6 @@ public class SSMonthView extends View{
         }
         return resultSize;
     }
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        widthAttr = getLayoutParams().width;
-        heightAttr = getLayoutParams().height;
-    }
 
     private void initEditorMode(String testMonth, String selectedDays){
         SSMonth ssMonth;
@@ -335,4 +333,72 @@ public class SSMonthView extends View{
     public interface OnMonthDayClickListener{
         void onMonthDayClick(SSDay ssDay);
     }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Log.d(TAG, "onSaveInstanceState subview...");
+        Parcelable superParcelable = super.onSaveInstanceState();
+        SavedState savedState = new SavedState(superParcelable);
+        savedState.monthDays = mMonthDays;
+        savedState.realRowCount = realRowCount;
+        savedState.selectedDays = ssMonth.getSelectedDays();
+        return savedState;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        Log.d(TAG, "onRestoreInstanceState subview...");
+        //begin boilerplate code so parent classes can restore state
+        if(!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+
+        SavedState ss = (SavedState)state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        //end
+
+        this.mMonthDays = ss.monthDays;
+        this.realRowCount = ss.realRowCount;
+        this.ssMonth.setSelectedDays(ss.selectedDays);
+
+    }
+
+    static class SavedState extends BaseSavedState {
+
+        List<List<SSDay>> monthDays;
+        List<SSDay> selectedDays;
+        int realRowCount;
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeList(this.monthDays);
+            dest.writeList(selectedDays);
+            dest.writeInt(this.realRowCount);
+        }
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        protected SavedState(Parcel in) {
+            super(in);
+            this.monthDays = new ArrayList<>(ROW_COUNT);
+            in.readList(this.monthDays, List.class.getClassLoader());
+            this.selectedDays = new ArrayList<>(5);
+            in.readList(this.selectedDays, List.class.getClassLoader());
+            this.realRowCount = in.readInt();
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel source) {
+                return new SavedState(source);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
 }

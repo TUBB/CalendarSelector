@@ -1,6 +1,8 @@
 package com.tubb.calendarselector;
 
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,7 +24,7 @@ import com.tubb.calendarselector.library.SegmentSelectListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScrollingActivity extends AppCompatActivity {
+public class CalendarActivity extends AppCompatActivity {
 
     private static final String TAG = "mv";
 
@@ -31,7 +34,6 @@ public class ScrollingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scrolling);
-
         RecyclerView rvCalendar = (RecyclerView) findViewById(R.id.rvCalendar);
         rvCalendar.setLayoutManager(new LinearLayoutManager(this));
         final List<SSMonth> data = getData();
@@ -45,7 +47,7 @@ public class ScrollingActivity extends AppCompatActivity {
 //            @Override
 //            public boolean onInterceptSelect(List<SSDay> selectedDays, SSDay selectingDay) {
 //                if(selectedDays.size() >= 5) {
-//                    Toast.makeText(ScrollingActivity.this, "Selected days can't more than 5", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(CalendarActivity.this, "Selected days can't more than 5", Toast.LENGTH_LONG).show();
 //                    return true;
 //                }
 //                return super.onInterceptSelect(selectedDays, selectingDay);
@@ -61,7 +63,7 @@ public class ScrollingActivity extends AppCompatActivity {
             @Override
             public boolean onInterceptSelect(SSDay selectingDay) {
                 if(DateUtils.isToday(selectingDay.getSsMonth().getYear(), selectingDay.getSsMonth().getMonth(), selectingDay.getDay())){
-                    Toast.makeText(ScrollingActivity.this, "Today can't be selected", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CalendarActivity.this, "Today can't be selected", Toast.LENGTH_LONG).show();
                     return true;
                 }
                 return super.onInterceptSelect(selectingDay);
@@ -73,7 +75,7 @@ public class ScrollingActivity extends AppCompatActivity {
                         endDay.getSsMonth().getYear(), endDay.getSsMonth().getMonth(), endDay.getDay());
                 Log.d(TAG, "differDays " + differDays);
                 if(differDays > 5) {
-                    Toast.makeText(ScrollingActivity.this, "Selected days can't more than 5", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CalendarActivity.this, "Selected days can't more than 5", Toast.LENGTH_LONG).show();
                     return true;
                 }
                 return super.onInterceptSelect(startDay, endDay);
@@ -132,4 +134,55 @@ public class ScrollingActivity extends AppCompatActivity {
             ssMonthView = (SSMonthView) itemView.findViewById(R.id.ssMv);
         }
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "onSaveInstanceState...");
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.d(TAG, "onRestoreInstanceState...");
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+
+//    static class SavedState extends View.BaseSavedState {
+//
+//        List<List<SSDay>> monthDays;
+//        List<SSDay> selectedDays;
+//        int realRowCount;
+//
+//        @Override
+//        public void writeToParcel(Parcel dest, int flags) {
+//            dest.writeList(this.monthDays);
+//            dest.writeList(selectedDays);
+//            dest.writeInt(this.realRowCount);
+//        }
+//
+//        public SavedState(Parcelable superState) {
+//            super(superState);
+//        }
+//
+//        protected SavedState(Parcel in) {
+//            super(in);
+//            this.monthDays = new ArrayList<>(ROW_COUNT);
+//            in.readList(this.monthDays, List.class.getClassLoader());
+//            this.selectedDays = new ArrayList<>(5);
+//            in.readList(this.selectedDays, List.class.getClassLoader());
+//            this.realRowCount = in.readInt();
+//        }
+//
+//        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+//            public SavedState createFromParcel(Parcel source) {
+//                return new SavedState(source);
+//            }
+//
+//            public SavedState[] newArray(int size) {
+//                return new SavedState[size];
+//            }
+//        };
+//    }
+
 }

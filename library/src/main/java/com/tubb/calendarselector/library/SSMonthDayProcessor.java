@@ -185,7 +185,7 @@ public class SSMonthDayProcessor {
 
     private void intervalSelect(SSMonthView ssMonthView, SSDay ssDay) {
         if(intervalSelectListener.onInterceptSelect(sDays, ssDay)) return;
-        Set<SSDay> selectedDays = ssDay.getSsMonth().getSelectedDays();
+        List<SSDay> selectedDays = ssDay.getSsMonth().getSelectedDays();
         if(selectedDays.contains(ssDay)) {
             selectedDays.remove(ssDay);
             sDays.remove(ssDay);
