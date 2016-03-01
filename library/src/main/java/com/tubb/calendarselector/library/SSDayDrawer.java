@@ -19,11 +19,20 @@ public abstract class SSDayDrawer {
         return getCY(row, dayViewHeight) + paint.measureText(String.valueOf(day), 0, 1) / 2;
     }
 
+    protected float getXLunar(String day, int col, int dayViewWidth, Paint paint){
+        return getCX(col, dayViewWidth) - paint.measureText(day) / 2;
+    }
+    protected float getYLunar(String day,int row, int dayViewHeight, Paint paint){
+        return getCY(row, dayViewHeight) + paint.measureText(day, 0, 1) /2 *3 ;
+    }
     protected float getCX(int col, int dayViewWidth){
         return (col + 0.5f) * dayViewWidth;
     }
 
     protected float getCY(int row, int dayViewHeight){
         return (row + 1) * dayViewHeight - dayViewHeight / 2;
+    }
+    protected float getCircleRadius(Paint paint){
+        return paint.getTextSize();
     }
 }

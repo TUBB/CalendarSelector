@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tubb.calendarselector.library.DateUtils;
+import com.tubb.calendarselector.library.LunarDayDrawer;
 import com.tubb.calendarselector.library.SSDay;
 import com.tubb.calendarselector.library.SSMonth;
 import com.tubb.calendarselector.library.SSMonthDayProcessor;
@@ -112,6 +113,7 @@ public class ScrollingActivity extends AppCompatActivity {
             SSMonth ssMonth = months.get(position);
             holder.tvMonthTitle.setText(String.format("%d-%d", ssMonth.getYear(), ssMonth.getMonth()));
             holder.ssMonthView.setSsMonth(ssMonth);
+            holder.ssMonthView.setDayDrawer(new LunarDayDrawer(ScrollingActivity.this));
             processor.bind(holder.ssMonthView, holder);
         }
 

@@ -3,8 +3,6 @@ package com.tubb.calendarselector.library;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 /**
  * Created by tubingbing on 16/1/28.
@@ -79,7 +77,5 @@ public class DefaultSSDayDrawer extends SSDayDrawer{
         }
     }
 
-    private float getCircleRadius(Paint paint){
-        return paint.getTextSize();
-    }
+
 }
