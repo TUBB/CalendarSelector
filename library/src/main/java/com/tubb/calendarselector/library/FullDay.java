@@ -8,9 +8,9 @@ import android.os.Parcelable;
  */
 public class FullDay implements Parcelable {
 
-    private int year;
-    private int month;
-    private int day;
+    protected int year;
+    protected int month;
+    protected int day;
 
     public FullDay(int year, int month, int day) {
         this.year = year;

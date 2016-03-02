@@ -42,8 +42,8 @@ Just use [SSMonthView][1], [SSMonthView][1] is a custom view for display month's
 
 ![Month](https://github.com/TUBB/CalendarSelector/blob/master/art/1.png)
 
-We provide two `calendar selector` to select dates, one ( [SingleMonthSelector][2] ) is use for single month, 
-another ( [CalendarSelector][3] ) is use for multi months
+We provide two `calendar selector` to select dates, one ( [SingleMonthSelector][2] ) is used for single month, 
+another ( [CalendarSelector][3] ) is used for multi months
 
 [SingleMonthSelector][2] usage
 
