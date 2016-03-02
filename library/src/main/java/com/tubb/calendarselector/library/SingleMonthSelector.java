@@ -22,7 +22,6 @@ public class SingleMonthSelector implements Parcelable {
         this.mode = mode;
     }
 
-
     public void bind(final SSMonthView ssMonthView){
         if(ssMonthView == null)
             throw new IllegalArgumentException("Invalid params of bind(final ViewGroup container, final SSMonthView ssMonthView, final int position) method");
@@ -76,6 +75,8 @@ public class SingleMonthSelector implements Parcelable {
                 ssMonthView.invalidate();
                 segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
             }else{
+                // selected the same day when the end day is not selected
+                segmentSelectListener.selectedSameDay(ssDay);
                 ssMonth.getSelectedDays().clear();
                 ssMonthView.invalidate();
                 startSelectedRecord.reset();
@@ -90,6 +91,7 @@ public class SingleMonthSelector implements Parcelable {
             endSelectedRecord.reset();
         }
     }
+
 
     protected void intervalSelect(SSMonthView ssMonthView, FullDay day) {
         List<FullDay> selectedDays = ssMonthView.getSsMonth().getSelectedDays();
@@ -139,6 +141,14 @@ public class SingleMonthSelector implements Parcelable {
         }
 
         public SelectedRecord() {
+        }
+
+        @Override
+        public String toString() {
+            return "SelectedRecord{" +
+                    "position=" + position +
+                    ", day=" + day +
+                    '}';
         }
 
         protected SelectedRecord(Parcel in) {

@@ -65,10 +65,9 @@ public class CalendarSelectorActivity extends AppCompatActivity {
             public boolean onInterceptSelect(FullDay startDay, FullDay endDay) {
                 int differDays = DateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
                         endDay.getYear(), endDay.getMonth(), endDay.getDay());
-                Log.d(TAG, "segment select " + startDay.toString() + " : " + endDay.toString());
                 Log.d(TAG, "differDays " + differDays);
-                if(differDays > 5) {
-                    Toast.makeText(CalendarSelectorActivity.this, "Selected days can't more than 5", Toast.LENGTH_SHORT).show();
+                if(differDays > 10) {
+                    Toast.makeText(CalendarSelectorActivity.this, "Selected days can't more than 10", Toast.LENGTH_SHORT).show();
                     return true;
                 }
                 return super.onInterceptSelect(startDay, endDay);

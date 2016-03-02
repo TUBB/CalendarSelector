@@ -11,4 +11,7 @@ public abstract class SegmentSelectListener {
     public boolean onInterceptSelect(FullDay selectingDay){
         return false;
     }
+    public void selectedSameDay(FullDay sameDay){
+
+    }
 }

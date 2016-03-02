@@ -25,7 +25,7 @@ Usage
 Add to dependencies
 
 ```groovy
-compile 'com.tubb.calendarselector.library:calendar-selector:1.0'
+compile 'com.tubb.calendarselector.library:calendar-selector:1.1'
 ```
 
 Just use [SSMonthView][1], [SSMonthView][1] is a custom view for display month's days
@@ -51,7 +51,7 @@ another ( [CalendarSelector][3] ) is used for multi months
 singleMonthSelector.bind(monthView);
 ```
 
-[CalendarSelector][3] usage ( support all `ViewGroup`'s subclasses )
+[CalendarSelector][3] usage ( support all `ViewGroup`'s subclasses, except `ListView` )
 
 ```java
 calendarSelector.bind(containerViewGroup, monthView, itemPosition);

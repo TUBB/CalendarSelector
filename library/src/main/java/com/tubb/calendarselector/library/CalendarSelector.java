@@ -1,8 +1,13 @@
 package com.tubb.calendarselector.library;
 
 import android.os.Parcel;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ListView;
+
 import java.util.List;
 
 /**
@@ -25,6 +30,7 @@ public class CalendarSelector extends SingleMonthSelector {
             throw new IllegalArgumentException("Please set IntervalSelectListener for Mode.INTERVAL mode");
         if(this.mode == Mode.SEGMENT && this.segmentSelectListener == null)
             throw new IllegalArgumentException("Please set SegmentSelectListener for Mode.SEGMENT mode");
+        if(container instanceof ListView) throw new IllegalArgumentException("Not support ListView yet");
         ssMonthView.setMonthDayClickListener(new SSMonthView.OnMonthDayClickListener() {
             @Override
             public void onMonthDayClick(FullDay day) {
@@ -44,6 +50,10 @@ public class CalendarSelector extends SingleMonthSelector {
     }
 
     private void segmentSelect(ViewGroup container, SSMonthView ssMonthView, FullDay ssDay, int position) {
+
+        Log.d(TAG, startSelectedRecord != null?startSelectedRecord.toString():"startSelectedRecord is null");
+        Log.d(TAG, endSelectedRecord != null?endSelectedRecord.toString():"endSelectedRecord is null");
+
         if(segmentSelectListener.onInterceptSelect(ssDay)) return;
 
         if(!startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){ // init status
@@ -86,6 +96,8 @@ public class CalendarSelector extends SingleMonthSelector {
                     ssMonthView.invalidate();
                     segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
                 }else{
+                    // selected the same day when the end day is not selected
+                    segmentSelectListener.selectedSameDay(ssDay);
                     ssMonth.getSelectedDays().clear();
                     ssMonthView.invalidate();
                     startSelectedRecord.reset();
@@ -123,14 +135,23 @@ public class CalendarSelector extends SingleMonthSelector {
     private void invalidate(ViewGroup container, int position){
         if(position >= 0) {
             View childView = container.getChildAt(position);
-            if(childView instanceof ViewGroup){
-                ViewGroup vg = (ViewGroup) childView;
-                for (int i = 0; i < vg.getChildCount(); i++) {
-                    View view = vg.getChildAt(i);
-                    if(view instanceof SSMonthView) view.invalidate();
+            if(childView == null){
+                if(container instanceof RecyclerView){
+                    RecyclerView rv = (RecyclerView)container;
+                    rv.getAdapter().notifyItemChanged(position);
+                }else{
+                    Log.e(TAG, "the container view is not expected ViewGroup");
                 }
             }else{
-                if(childView instanceof SSMonthView) childView.invalidate();
+                if(childView instanceof ViewGroup){
+                    ViewGroup vg = (ViewGroup) childView;
+                    for (int i = 0; i < vg.getChildCount(); i++) {
+                        View view = vg.getChildAt(i);
+                        if(view instanceof SSMonthView) view.invalidate();
+                    }
+                }else{
+                    if(childView instanceof SSMonthView) childView.invalidate();
+                }
             }
         }
     }
@@ -166,10 +187,18 @@ public class CalendarSelector extends SingleMonthSelector {
         segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
     }
 
+    /**
+     * get the first selected day
+     * @return the first selected day, may be null
+     */
     public FullDay getStartDay(){
         return startSelectedRecord.day;
     }
 
+    /**
+     * get the last selected day
+     * @return the last selected day, may be null
+     */
     public FullDay getEndDay(){
         return endSelectedRecord.day;
     }
