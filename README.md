@@ -1,16 +1,17 @@
 Calendar Selector
 =================
 
-A `Calendar Selector` for select dates, support selecting a `continuous` period of time and some `discontinuous` dates.
+A `calendar selector` for select dates, support select a `continuous` period of time and some `discontinuous` dates.
 
 Supported functionality:
  
- * selecting `continuous` or `discontinuous` dates
+ * select `continuous` or `discontinuous` dates
  * single month or multi months selection
  * intercept select event
  * state saved
  * UI custom
  * editor mode support, a good feeling of developing
+ * API 8+
  
 Preview
 =======
@@ -40,24 +41,22 @@ Just use [SSMonthView][1], [SSMonthView][1] is a custom view for display month's
 
 ![Month](https://github.com/TUBB/CalendarSelector/blob/master/art/1.png)
 
-We provide two `calendar selector` to select dates, one ([SingleMonthSelector][2]) is for single month, 
-another ([CalendarSelector][3]) is for multi months
+We provide two `calendar selector` to select dates, one ( [SingleMonthSelector][2] ) is use for single month, 
+another ( [CalendarSelector][3] ) is use for multi months
 
-[SingleMonthSelector][2] Usage
+[SingleMonthSelector][2] usage
 
 ```java
 singleMonthSelector.bind(monthView);
 ```
 
-[CalendarSelector][3] Usage (support all `ViewGroup`'s subclasses)
+[CalendarSelector][3] usage ( support all `ViewGroup`'s subclasses )
 
 ```java
 calendarSelector.bind(containerViewGroup, monthView, itemPosition);
 ```
 
-[SingleMonthSelector][2] and [CalendarSelector][3] support two selector mode, `SEGMENT` and `INTERVAL`
-
-[SingleMonthSelector][2] and [CalendarSelector][3] support state saved, restore seletor state
+[SingleMonthSelector][2] and [CalendarSelector][3] support two selector mode ( `SEGMENT` and `INTERVAL` ) and state saved, restore seletor state
 
 More usage detail please see [SingleMonthSelectorActivity][4] and [CalendarSelectorActivity][5]
 
