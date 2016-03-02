@@ -52,32 +52,41 @@ public class DefaultSSDayDrawer extends SSDayDrawer{
     }
 
     @Override
+    protected void draw(SSMonth ssMonth, FullDay ssDay, Canvas canvas, int row, int col, int dayViewWidth, int dayViewHeight){
+        if(ssMonth.getSelectedDays().contains(ssDay))
+            drawSelectedDay(canvas, String.valueOf(ssDay.getDay()), row, col, dayViewWidth, dayViewHeight);
+        else if(DateUtils.isToday(ssDay.getYear(), ssDay.getMonth(), ssDay.getDay()))
+            drawToday(canvas, String.valueOf(ssDay.getDay()), row, col, dayViewWidth, dayViewHeight);
+        else if(DateUtils.isMonthDay(ssMonth.getYear(), ssMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
+            drawMonthDay(canvas, String.valueOf(ssDay.getDay()), row, col, dayViewWidth, dayViewHeight);
+        else if(DateUtils.isPrevMonthDay(ssMonth.getYear(), ssMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
+            drawPrevMonthDay(canvas, String.valueOf(ssDay.getDay()), row, col, dayViewWidth, dayViewHeight);
+        else if(DateUtils.isNextMonthDay(ssMonth.getYear(), ssMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
+            drawNextMonthDay(canvas, String.valueOf(ssDay.getDay()), row, col, dayViewWidth, dayViewHeight);
+    }
+
     protected void drawMonthDay(Canvas canvas, String day, int row, int col, int dayViewWidth, int dayViewHeight) {
         canvas.drawText(day, getX(day, col, dayViewWidth, mNormalDayPaint),
                 getY(day, row, dayViewHeight, mNormalDayPaint), mNormalDayPaint);
     }
 
-    @Override
     protected void drawPrevMonthDay(Canvas canvas, String day, int row, int col, int dayViewWidth, int dayViewHeight) {
         canvas.drawText(day, getX(day, col, dayViewWidth, mPreMonthDayPaint),
                 getY(day, row, dayViewHeight, mPreMonthDayPaint), mPreMonthDayPaint);
     }
 
-    @Override
     protected void drawNextMonthDay(Canvas canvas, String day, int row, int col, int dayViewWidth, int dayViewHeight) {
         canvas.drawText(day, getX(day, col, dayViewWidth, mNextMonthDayPaint),
                 getY(day, row, dayViewHeight, mNextMonthDayPaint), mNextMonthDayPaint);
     }
 
-    @Override
     protected void drawToday(Canvas canvas, String day, int row, int col, int dayViewWidth, int dayViewHeight) {
         canvas.drawText(day, getX(day, col, dayViewWidth, mTodayPaint),
                 getY(day, row, dayViewHeight, mTodayPaint), mTodayPaint);
     }
 
-    @Override
     protected void drawSelectedDay(Canvas canvas, String day, int row, int col, int dayViewWidth, int dayViewHeight) {
-        canvas.drawCircle(getCX(col, dayViewWidth), getCY(row, dayViewHeight), getCircleRadius(mSelectedDayPaint), mSelectedDayCirclePaint);
+        canvas.drawCircle(getCenterX(col, dayViewWidth), getCenterY(row, dayViewHeight), getCircleRadius(mSelectedDayPaint), mSelectedDayCirclePaint);
         canvas.drawText(day, getX(day, col, dayViewWidth, mSelectedDayPaint),
                 getY(day, row, dayViewHeight, mSelectedDayPaint), mSelectedDayPaint);
     }

@@ -10,6 +10,7 @@ Supported functionality:
  * intercept select event
  * state saved
  * UI custom
+ * indicate the start day of a week (`SUNDAY`、`SATURDAY`、`MONDAY`)
  * editor mode support, a good feeling of developing
  * API 8+
  

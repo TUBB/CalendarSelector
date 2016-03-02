@@ -50,7 +50,6 @@ public class CalendarSelector extends SingleMonthSelector {
             startSelectedRecord.position = position;
             startSelectedRecord.day = ssDay;
             ssMonthView.getSsMonth().addSelectedDay(ssDay);
-//            invalidate(container, position);
             ssMonthView.invalidate();
         }else if(startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){ // start day is ok, but end day not
             if(startSelectedRecord.position < position){ // click later month
@@ -84,12 +83,10 @@ public class CalendarSelector extends SingleMonthSelector {
                         endSelectedRecord.day = startSelectedRecord.day;
                         startSelectedRecord.day = ssDay;
                     }
-//                    invalidate(container, startSelectedRecord.position);
                     ssMonthView.invalidate();
                     segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
                 }else{
                     ssMonth.getSelectedDays().clear();
-//                    invalidate(container, startSelectedRecord.position);
                     ssMonthView.invalidate();
                     startSelectedRecord.reset();
                     endSelectedRecord.reset();
@@ -135,7 +132,6 @@ public class CalendarSelector extends SingleMonthSelector {
             }else{
                 if(childView instanceof SSMonthView) childView.invalidate();
             }
-
         }
     }
 
