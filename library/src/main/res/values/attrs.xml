@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="SSMonthView">
-        <attr name="day_height" format="dimension"/>
+        <!-- only draw the month day, or not, default is false -->
         <attr name="draw_monthday" format="boolean"/>
+        <!-- the monday day text color -->
         <attr name="normalday_color" format="color"/>
+        <!-- last month day text color -->
         <attr name="prevmonthday_color" format="color"/>
+        <!-- today text color -->
         <attr name="today_color" format="color"/>
+        <!-- next month day text color -->
         <attr name="nextmonthday_color" format="color"/>
+        <!-- selected day text color -->
         <attr name="selectedday_color" format="color"/>
+        <!-- selected day background color -->
         <attr name="selectedday_circle_color" format="color"/>
+        <!-- the day text size -->
         <attr name="day_size" format="dimension"/>
+        <!-- start day of a week, we support (sunday、monday and saturday) -->
         <attr name="firstDayOfWeek" format="enum">
             <enum name="sunday" value="1"/>
             <enum name="monday" value="2"/>
             <enum name="saturday" value="7"/>
         </attr>
+
+        <!-- editor mode only -->
+        <!-- test selected days (format:1,2,3,4) -->
         <attr name="selected_days" format="string"/>
+        <!-- test month (format:2016-3) -->
         <attr name="month" format="string"/>
     </declare-styleable>
 </resources>
