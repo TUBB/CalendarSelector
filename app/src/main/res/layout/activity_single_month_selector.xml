@@ -16,17 +16,15 @@
         tools:text="yyyy-mm-dd"
         android:textSize="20sp"
         android:gravity="center"
-        android:textColor="@color/c_33ccff"
-        />
+        android:textColor="@color/c_33ccff"/>
 
-    <include android:id="@+id/sundayIndicator" layout="@layout/layout_sunday_start"/>
+    <include layout="@layout/layout_sunday_start"/>
 
     <com.tubb.calendarselector.library.SSMonthView
         android:id="@+id/ssMv"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        ss:firstDayOfWeek="sunday"
-        ss:draw_monthday="false"
+        android:layout_height="250dp"
+        ss:draw_monthday="true"
         ss:month="2016-3"/>
 
 </LinearLayout>

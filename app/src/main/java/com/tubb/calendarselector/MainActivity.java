@@ -20,8 +20,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.bt_normal:
                 startActivity(new Intent(this, NormalActivity.class));
                 break;
+            case R.id.bt_single:
+                startActivity(new Intent(this, SingleMonthSelectorActivity.class));
+                break;
             case R.id.bt_calendar:
-                startActivity(new Intent(this, CalendarActivity.class));
+                startActivity(new Intent(this, CalendarSelectorActivity.class));
+                break;
+            case R.id.bt_custom:
+                startActivity(new Intent(this, CustomDrawerActivity.class));
+                break;
+            case R.id.bt_savedstate:
+                startActivity(new Intent(this, StateSavedActivity.class));
                 break;
         }
     }

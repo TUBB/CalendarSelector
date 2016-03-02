@@ -8,7 +8,7 @@ import com.tubb.calendarselector.library.FullDay;
 import com.tubb.calendarselector.library.SSMonth;
 import com.tubb.calendarselector.library.SSMonthView;
 
-public class NormalActivity extends AppCompatActivity {
+public class CustomDrawerActivity extends AppCompatActivity {
 
     private static final String TAG = "mv";
     SSMonth ssMonth;
@@ -27,7 +27,7 @@ public class NormalActivity extends AppCompatActivity {
         if(ssMonth == null)
             ssMonth = new SSMonth(2016, 1);
         tvMonthTitle.setText(ssMonth.toString());
-        ssMonthView.setSsMonth(ssMonth);
+        ssMonthView.setSsMonth(ssMonth, new CustomDrawer(this.getApplicationContext()));
         ssMonthView.setMonthDayClickListener(new SSMonthView.OnMonthDayClickListener() {
             @Override
             public void onMonthDayClick(FullDay day) {

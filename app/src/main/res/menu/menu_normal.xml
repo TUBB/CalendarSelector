@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <item
+        android:id="@+id/action_sunday_indicator"
+        android:orderInCategory="100"
+        android:title="sunday start"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_saturday_indicator"
+        android:orderInCategory="100"
+        android:title="saturday start"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_monday_indicator"
+        android:orderInCategory="100"
+        android:title="monday start"
+        app:showAsAction="never" />
+</menu>

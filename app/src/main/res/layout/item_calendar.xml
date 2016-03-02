@@ -17,14 +17,16 @@
         android:gravity="center"
         android:textColor="@color/c_33ccff"/>
 
+    <include layout="@layout/layout_sunday_start"/>
+
     <com.tubb.calendarselector.library.SSMonthView
         android:id="@+id/ssMv"
         android:layout_width="wrap_content"
         android:layout_height="250dp"
-        ss:draw_monthday="false"
+        ss:draw_monthday="true"
         ss:day_size="@dimen/t_16"
-        ss:firstDayOfWeek="saturday"
-        ss:month="2016-4"
+        ss:firstDayOfWeek="sunday"
+        ss:month="2016-1"
         ss:selected_days="1,2,15"
         />
 </LinearLayout>

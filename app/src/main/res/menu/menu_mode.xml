@@ -1,10 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".CalendarActivity">
+    >
+
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_segment"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="segment mode"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_interval"
+        android:orderInCategory="100"
+        android:title="interval mode"
         app:showAsAction="never" />
 </menu>

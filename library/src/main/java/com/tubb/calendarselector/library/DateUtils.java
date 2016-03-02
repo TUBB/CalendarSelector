@@ -91,6 +91,26 @@ public class DateUtils {
         return new SSMonth(year, month);
     }
 
+    public static boolean isPrevMonthDay(int year, int month, int otherYear, int otherMonth){
+        if((year - otherYear) == 1 && otherMonth == 12) return true;
+        if(otherYear != year) return false;
+        if(otherMonth + 1 != month) return false;
+        return true;
+    }
+
+    public static boolean isMonthDay(int year, int month, int otherYear, int otherMonth){
+        if(otherYear != year) return false;
+        if(otherMonth != month) return false;
+        return true;
+    }
+
+    public static boolean isNextMonthDay(int year, int month, int otherYear, int otherMonth){
+        if((otherYear - year) == 1 && otherMonth == 1) return true;
+        if(otherYear != year) return false;
+        if(otherMonth - 1 != month) return false;
+        return true;
+    }
+
     public static boolean isToday(int year, int month, int day) {
         return year == getCurrentYear() && month == getCurrentMonth() && day == getCurrentDay();
     }
@@ -98,11 +118,11 @@ public class DateUtils {
     public static int countDays(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay) {
         Calendar startC = Calendar.getInstance();
         startC.set(Calendar.YEAR, startYear);
-        startC.set(Calendar.MONTH, startMonth);
+        startC.set(Calendar.MONTH, startMonth-1);
         startC.set(Calendar.DAY_OF_MONTH, startDay);
         Calendar endC = Calendar.getInstance();
         endC.set(Calendar.YEAR, endYear);
-        endC.set(Calendar.MONTH, endMonth);
+        endC.set(Calendar.MONTH, endMonth-1);
         endC.set(Calendar.DAY_OF_MONTH, endDay);
         return (int) ((endC.getTimeInMillis() - startC.getTimeInMillis()) / 86400000 + 1);
     }

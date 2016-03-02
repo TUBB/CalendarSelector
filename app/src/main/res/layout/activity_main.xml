@@ -14,16 +14,40 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
-        android:text="Normal Month View"
+        android:text="Normal"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_single"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Single Month Selector"
         android:onClick="viewClick"/>
 
     <Button
         android:id="@+id/bt_calendar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
         android:textSize="20sp"
-        android:text="Calendar"
+        android:text="Calendar Selector"
         android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_custom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Custom Drawer"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_savedstate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="State Saved"
+        android:onClick="viewClick"/>
+
 
 </LinearLayout>
