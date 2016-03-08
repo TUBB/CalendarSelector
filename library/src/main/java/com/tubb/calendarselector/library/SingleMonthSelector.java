@@ -22,79 +22,79 @@ public class SingleMonthSelector implements Parcelable {
         this.mode = mode;
     }
 
-    public void bind(final SSMonthView ssMonthView){
-        if(ssMonthView == null)
-            throw new IllegalArgumentException("Invalid params of bind(final ViewGroup container, final SSMonthView ssMonthView, final int position) method");
+    public void bind(final MonthView monthView){
+        if(monthView == null)
+            throw new IllegalArgumentException("Invalid params of bind(final ViewGroup container, final SSMonthView monthView, final int position) method");
         if(this.mode == Mode.INTERVAL && this.intervalSelectListener == null)
             throw new IllegalArgumentException("Please set IntervalSelectListener for Mode.INTERVAL mode");
         if(this.mode == Mode.SEGMENT && this.segmentSelectListener == null)
             throw new IllegalArgumentException("Please set SegmentSelectListener for Mode.SEGMENT mode");
-        ssMonthView.setMonthDayClickListener(new SSMonthView.OnMonthDayClickListener() {
+        monthView.setMonthDayClickListener(new MonthView.OnMonthDayClickListener() {
             @Override
             public void onMonthDayClick(FullDay day) {
-                if(!DateUtils.isMonthDay(ssMonthView.getSsMonth().getYear(), ssMonthView.getSsMonth().getMonth(),
+                if(!SCDateUtils.isMonthDay(monthView.getSCMonth().getYear(), monthView.getSCMonth().getMonth(),
                         day.getYear(), day.getMonth()))
                     return;
                 switch (mode){
                     case INTERVAL:
-                        intervalSelect(ssMonthView, day);
+                        intervalSelect(monthView, day);
                         break;
                     case SEGMENT:
-                        segmentSelect(ssMonthView, day);
+                        segmentSelect(monthView, day);
                         break;
                 }
             }
         });
     }
 
-    private void segmentSelect(SSMonthView ssMonthView, FullDay ssDay) {
+    private void segmentSelect(MonthView monthView, FullDay ssDay) {
         if(segmentSelectListener.onInterceptSelect(ssDay)) return;
 
         if(startSelectedRecord.day == null && endSelectedRecord.day == null){ // init status
             startSelectedRecord.day = ssDay;
-            ssMonthView.getSsMonth().addSelectedDay(ssDay);
-            ssMonthView.invalidate();
+            monthView.getSCMonth().addSelectedDay(ssDay);
+            monthView.invalidate();
         }else if(endSelectedRecord.day == null){ // start day is ok, but end day not
 
-            SSMonth ssMonth = ssMonthView.getSsMonth();
+            SCMonth SCMonth = monthView.getSCMonth();
             if(startSelectedRecord.day.getDay() != ssDay.getDay()){
                 if(startSelectedRecord.day.getDay() < ssDay.getDay()){
                     if(segmentSelectListener.onInterceptSelect(startSelectedRecord.day, ssDay)) return;
                     for (int day = startSelectedRecord.day.getDay(); day <= ssDay.getDay(); day++){
-                        ssMonth.addSelectedDay(new FullDay(ssMonth.getYear(), ssMonth.getMonth(), day));
+                        SCMonth.addSelectedDay(new FullDay(SCMonth.getYear(), SCMonth.getMonth(), day));
                     }
                     endSelectedRecord.day = ssDay;
                 }else if(startSelectedRecord.day.getDay() > ssDay.getDay()){
                     if(segmentSelectListener.onInterceptSelect(ssDay, startSelectedRecord.day)) return;
                     for (int day = ssDay.getDay(); day <= startSelectedRecord.day.getDay(); day++){
-                        ssMonth.addSelectedDay(new FullDay(ssMonth.getYear(), ssMonth.getMonth(), day));
+                        SCMonth.addSelectedDay(new FullDay(SCMonth.getYear(), SCMonth.getMonth(), day));
                     }
                     endSelectedRecord.day = startSelectedRecord.day;
                     startSelectedRecord.day = ssDay;
                 }
-                ssMonthView.invalidate();
+                monthView.invalidate();
                 segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
             }else{
                 // selected the same day when the end day is not selected
                 segmentSelectListener.selectedSameDay(ssDay);
-                ssMonth.getSelectedDays().clear();
-                ssMonthView.invalidate();
+                SCMonth.getSelectedDays().clear();
+                monthView.invalidate();
                 startSelectedRecord.reset();
                 endSelectedRecord.reset();
             }
 
         }else { // start day and end day is ok
-            ssMonthView.getSsMonth().getSelectedDays().clear();
-            ssMonthView.getSsMonth().getSelectedDays().add(ssDay);
-            ssMonthView.invalidate();
+            monthView.getSCMonth().getSelectedDays().clear();
+            monthView.getSCMonth().getSelectedDays().add(ssDay);
+            monthView.invalidate();
             startSelectedRecord.day = ssDay;
             endSelectedRecord.reset();
         }
     }
 
 
-    protected void intervalSelect(SSMonthView ssMonthView, FullDay day) {
-        List<FullDay> selectedDays = ssMonthView.getSsMonth().getSelectedDays();
+    protected void intervalSelect(MonthView monthView, FullDay day) {
+        List<FullDay> selectedDays = monthView.getSCMonth().getSelectedDays();
         if(selectedDays.contains(day)) {
             selectedDays.remove(day);
             sDays.remove(day);
@@ -105,7 +105,7 @@ public class SingleMonthSelector implements Parcelable {
             sDays.add(day);
         }
         intervalSelectListener.onIntervalSelect(sDays);
-        ssMonthView.invalidate();
+        monthView.invalidate();
     }
 
     public void setIntervalSelectListener(IntervalSelectListener intervalSelectListener) {

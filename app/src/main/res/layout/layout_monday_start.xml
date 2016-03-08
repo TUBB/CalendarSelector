@@ -7,12 +7,11 @@
     android:paddingBottom="10dp"
     android:layout_marginTop="7dp"
     >
-
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="一"
+        android:text="@string/mon"
         android:textSize="16sp"
         android:gravity="center"/>
 
@@ -20,7 +19,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="二"
+        android:text="@string/tue"
         android:textSize="16sp"
         android:gravity="center"/>
 
@@ -28,7 +27,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="三"
+        android:text="@string/wed"
         android:textSize="16sp"
         android:gravity="center"/>
 
@@ -36,7 +35,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="四"
+        android:text="@string/thu"
         android:textSize="16sp"
         android:gravity="center"/>
 
@@ -44,24 +43,22 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="五"
+        android:text="@string/fri"
         android:textSize="16sp"
         android:gravity="center"/>
-
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="六"
+        android:text="@string/sat"
         android:textSize="16sp"
         android:textColor="#cccccc"
         android:gravity="center"/>
-
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="日"
+        android:text="@string/sun"
         android:textSize="16sp"
         android:textColor="#cccccc"
         android:gravity="center"/>

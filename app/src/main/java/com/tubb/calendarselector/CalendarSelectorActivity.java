@@ -13,15 +13,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.tubb.calendarselector.library.DateUtils;
+import com.tubb.calendarselector.library.SCDateUtils;
 import com.tubb.calendarselector.library.FullDay;
 import com.tubb.calendarselector.library.IntervalSelectListener;
-import com.tubb.calendarselector.library.SSMonth;
+import com.tubb.calendarselector.library.SCMonth;
 import com.tubb.calendarselector.library.CalendarSelector;
-import com.tubb.calendarselector.library.SSMonthView;
+import com.tubb.calendarselector.library.MonthView;
 import com.tubb.calendarselector.library.SegmentSelectListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CalendarSelectorActivity extends AppCompatActivity {
@@ -30,7 +29,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
 
     CalendarSelector processor;
     RecyclerView rvCalendar;
-    List<SSMonth> data;
+    List<SCMonth> data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +39,18 @@ public class CalendarSelectorActivity extends AppCompatActivity {
             processor = savedInstanceState.getParcelable("selector");
         rvCalendar = (RecyclerView) findViewById(R.id.rvCalendar);
         rvCalendar.setLayoutManager(new LinearLayoutManager(this));
+        data = getData();
         segmentMode();
     }
 
+    /**
+     * segment mode
+     */
     private void segmentMode(){
-        data = getData();
+
+        for (SCMonth month:data)
+            month.getSelectedDays().clear();
+
         processor = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
         processor.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
@@ -54,7 +60,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
 
             @Override
             public boolean onInterceptSelect(FullDay selectingDay) {
-                if(DateUtils.isToday(selectingDay.getYear(), selectingDay.getMonth(), selectingDay.getDay())){
+                if(SCDateUtils.isToday(selectingDay.getYear(), selectingDay.getMonth(), selectingDay.getDay())){
                     Toast.makeText(CalendarSelectorActivity.this, "Today can't be selected", Toast.LENGTH_SHORT).show();
                     return true;
                 }
@@ -63,7 +69,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
 
             @Override
             public boolean onInterceptSelect(FullDay startDay, FullDay endDay) {
-                int differDays = DateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
+                int differDays = SCDateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
                         endDay.getYear(), endDay.getMonth(), endDay.getDay());
                 Log.d(TAG, "differDays " + differDays);
                 if(differDays > 10) {
@@ -76,8 +82,12 @@ public class CalendarSelectorActivity extends AppCompatActivity {
         rvCalendar.setAdapter(new CalendarAdpater(data));
     }
 
+    /**
+     * interval mode
+     */
     private void intervalMode(){
-        data = getData();
+        for (SCMonth month:data)
+            month.getSelectedDays().clear();
         processor = new CalendarSelector(data, CalendarSelector.Mode.INTERVAL);
         processor.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
@@ -97,23 +107,15 @@ public class CalendarSelectorActivity extends AppCompatActivity {
         rvCalendar.setAdapter(new CalendarAdpater(data));
     }
 
-    public List<SSMonth> getData() {
-        List<SSMonth> data = new ArrayList<>();
-        for (int i = 1; i <= 12; i++) {
-            data.add(new SSMonth(2016, i));
-        }
-        for (int i = 1; i <= 12; i++) {
-            data.add(new SSMonth(2017, i));
-        }
-        return data;
-
+    public List<SCMonth> getData() {
+        return SCDateUtils.generateMonths(2016, 3, 2017, 6);
     }
 
     class CalendarAdpater extends RecyclerView.Adapter<CalendarViewHolder>{
 
-        List<SSMonth> months;
+        List<SCMonth> months;
 
-        public CalendarAdpater(List<SSMonth> months){
+        public CalendarAdpater(List<SCMonth> months){
             this.months = months;
         }
 
@@ -124,10 +126,10 @@ public class CalendarSelectorActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(CalendarViewHolder holder, int position) {
-            SSMonth ssMonth = months.get(position);
-            holder.tvMonthTitle.setText(String.format("%d-%d", ssMonth.getYear(), ssMonth.getMonth()));
-            holder.ssMonthView.setSsMonth(ssMonth);
-            processor.bind(rvCalendar, holder.ssMonthView, position);
+            SCMonth SCMonth = months.get(position);
+            holder.tvMonthTitle.setText(String.format("%d-%d", SCMonth.getYear(), SCMonth.getMonth()));
+            holder.monthView.setSCMonth(SCMonth);
+            processor.bind(rvCalendar, holder.monthView, position);
         }
 
         @Override
@@ -139,12 +141,12 @@ public class CalendarSelectorActivity extends AppCompatActivity {
     class CalendarViewHolder extends RecyclerView.ViewHolder{
 
         TextView tvMonthTitle;
-        SSMonthView ssMonthView;
+        MonthView monthView;
 
         public CalendarViewHolder(View itemView) {
             super(itemView);
             tvMonthTitle = (TextView) itemView.findViewById(R.id.tvMonthTitle);
-            ssMonthView = (SSMonthView) itemView.findViewById(R.id.ssMv);
+            monthView = (MonthView) itemView.findViewById(R.id.ssMv);
         }
     }
 

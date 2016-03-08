@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ss="http://schemas.android.com/apk/res-auto"
+    xmlns:sc="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -21,12 +21,12 @@
 
     <include android:id="@+id/sundayIndicator" layout="@layout/layout_sunday_start"/>
 
-    <com.tubb.calendarselector.library.SSMonthView
+    <com.tubb.calendarselector.library.MonthView
         android:id="@+id/ssMv"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        ss:firstDayOfWeek="sunday"
-        ss:draw_monthday="false"
-        ss:month="2016-3"/>
+        sc:sc_firstday_week="sunday"
+        sc:sc_draw_monthday="false"
+        sc:sc_month="2016-3"/>
 
 </LinearLayout>

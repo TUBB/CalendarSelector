@@ -5,35 +5,35 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.tubb.calendarselector.library.FullDay;
-import com.tubb.calendarselector.library.SSMonth;
-import com.tubb.calendarselector.library.SSMonthView;
+import com.tubb.calendarselector.library.SCMonth;
+import com.tubb.calendarselector.library.MonthView;
 
 public class CustomDrawerActivity extends AppCompatActivity {
 
     private static final String TAG = "mv";
-    SSMonth ssMonth;
-    private SSMonthView ssMonthView;
+    SCMonth SCMonth;
+    private MonthView monthView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_normal);
-        ssMonthView = (SSMonthView) findViewById(R.id.ssMv);
+        monthView = (MonthView) findViewById(R.id.ssMv);
 
         TextView tvMonthTitle = (TextView) findViewById(R.id.tvMonthTitle);
         if(savedInstanceState != null){
-            ssMonth = savedInstanceState.getParcelable("month");
+            SCMonth = savedInstanceState.getParcelable("month");
         }
-        if(ssMonth == null)
-            ssMonth = new SSMonth(2016, 1);
-        tvMonthTitle.setText(ssMonth.toString());
-        ssMonthView.setSsMonth(ssMonth, new CustomDrawer(this.getApplicationContext()));
-        ssMonthView.setMonthDayClickListener(new SSMonthView.OnMonthDayClickListener() {
+        if(SCMonth == null)
+            SCMonth = new SCMonth(2016, 1);
+        tvMonthTitle.setText(SCMonth.toString());
+        monthView.setSsMonth(SCMonth, new CustomDrawer(this.getApplicationContext()));
+        monthView.setMonthDayClickListener(new MonthView.OnMonthDayClickListener() {
             @Override
             public void onMonthDayClick(FullDay day) {
-                ssMonthView.getSsMonth().getSelectedDays().clear();
-                ssMonthView.getSsMonth().getSelectedDays().add(day);
-                ssMonthView.invalidate();
+                monthView.getSCMonth().getSelectedDays().clear();
+                monthView.getSCMonth().getSelectedDays().add(day);
+                monthView.invalidate();
             }
         });
     }

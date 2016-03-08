@@ -25,19 +25,19 @@ Usage
 Add to dependencies
 
 ```groovy
-compile 'com.tubb.calendarselector.library:calendar-selector:1.1'
+compile 'com.tubb.calendarselector.library:calendar-selector:1.2'
 ```
 
-Just use [SSMonthView][1], [SSMonthView][1] is a custom view for display month's days
+Just use [MonthView][1], [MonthView][1] is a custom view for display month's days
 
 ```xml
-<com.tubb.calendarselector.library.SSMonthView
+<com.tubb.calendarselector.library.MonthView
     android:id="@+id/ssMv"
     android:layout_width="match_parent"
     android:layout_height="300dp"
-    ss:firstDayOfWeek="sunday"
-    ss:draw_monthday="false"
-    ss:month="2016-3"/>
+    sc:sc_firstday_week="sunday"
+    sc:sc_draw_monthday="false"
+    sc:sc_month="2016-3"/>
 ```
 
 ![Month](https://github.com/TUBB/CalendarSelector/blob/master/art/1.png)
@@ -61,30 +61,30 @@ calendarSelector.bind(containerViewGroup, monthView, itemPosition);
 
 More usage detail please see [SingleMonthSelectorActivity][4] and [CalendarSelectorActivity][5]
 
-We provide month's day drawer [SSDayDrawer][6] to custom month view display, you can draw anything, please look at [CustomDrawerActivity][7]
+We provide month's day drawer [DayDrawer][6] to custom month view display, we implements a default drawer [DefaultDayDrawer][8], you can extend it for you, please look at [CustomDrawerActivity][7]
 
-We include so many attrs for [SSMonthView][1], like indicate the start day of a week...
+We include so many attrs for [MonthView][1], just like indicate the start day of a week...
 
 ```xml
-<declare-styleable name="SSMonthView">
+<declare-styleable name="MonthView">
     <!-- only draw the month day, or not, default is false -->
-    <attr name="draw_monthday" format="boolean"/>
+    <attr name="sc_draw_monthday" format="boolean"/>
     <!-- the monday day text color -->
-    <attr name="normalday_color" format="color"/>
+    <attr name="sc_normalday_color" format="color"/>
     <!-- last month day text color -->
-    <attr name="prevmonthday_color" format="color"/>
+    <attr name="sc_prevmonthday_color" format="color"/>
     <!-- today text color -->
-    <attr name="today_color" format="color"/>
+    <attr name="sc_today_color" format="color"/>
     <!-- next month day text color -->
-    <attr name="nextmonthday_color" format="color"/>
+    <attr name="sc_nextmonthday_color" format="color"/>
     <!-- selected day text color -->
-    <attr name="selectedday_color" format="color"/>
+    <attr name="sc_selectedday_color" format="color"/>
     <!-- selected day background color -->
-    <attr name="selectedday_circle_color" format="color"/>
+    <attr name="sc_selectedday_bgcolor" format="color"/>
     <!-- the day text size -->
-    <attr name="day_size" format="dimension"/>
+    <attr name="sc_day_textsize" format="dimension"/>
     <!-- start day of a week, we support (sunday、monday and saturday) -->
-    <attr name="firstDayOfWeek" format="enum">
+    <attr name="sc_firstday_week" format="enum">
         <enum name="sunday" value="1"/>
         <enum name="monday" value="2"/>
         <enum name="saturday" value="7"/>
@@ -92,9 +92,9 @@ We include so many attrs for [SSMonthView][1], like indicate the start day of a 
 
     <!-- editor mode only -->
     <!-- test selected days (format:1,2,3,4) -->
-    <attr name="selected_days" format="string"/>
+    <attr name="sc_selected_days" format="string"/>
     <!-- test month (format:2016-3) -->
-    <attr name="month" format="string"/>
+    <attr name="sc_month" format="string"/>
 </declare-styleable>
 ```
 
@@ -117,10 +117,11 @@ License
 
 
 
- [1]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/SSMonthView.java
+ [1]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/MonthView.java
  [2]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/SingleMonthSelector.java
  [3]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/CalendarSelector.java
  [4]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/SingleMonthSelectorActivity.java
  [5]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/CalendarSelectorActivity.java
- [6]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/SSDayDrawer.java
+ [6]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/DayDrawer.java
  [7]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/CustomDrawerActivity.java
+ [8]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/DefaultDayDrawer.java

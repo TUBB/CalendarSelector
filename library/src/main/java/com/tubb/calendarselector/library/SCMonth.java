@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by tubingbing on 16/1/19.
  */
-public class SSMonth implements Parcelable {
+public class SCMonth implements Parcelable {
 
     public static final int SUNDAY_OF_WEEK = 1;
     public static final int MONDAY_OF_WEEK = 2;
@@ -17,7 +17,7 @@ public class SSMonth implements Parcelable {
     protected int month;
     protected List<FullDay> selectedDays = new ArrayList<>(5);
 
-    public SSMonth(int year, int month){
+    public SCMonth(int year, int month){
         this.year = year;
         this.month = month;
     }
@@ -55,9 +55,9 @@ public class SSMonth implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SSMonth ssMonth = (SSMonth) o;
-        if (year != ssMonth.year) return false;
-        return month == ssMonth.month;
+        SCMonth SCMonth = (SCMonth) o;
+        if (year != SCMonth.year) return false;
+        return month == SCMonth.month;
 
     }
 
@@ -85,19 +85,19 @@ public class SSMonth implements Parcelable {
         dest.writeTypedList(selectedDays);
     }
 
-    protected SSMonth(Parcel in) {
+    protected SCMonth(Parcel in) {
         this.year = in.readInt();
         this.month = in.readInt();
         this.selectedDays = in.createTypedArrayList(FullDay.CREATOR);
     }
 
-    public static final Parcelable.Creator<SSMonth> CREATOR = new Parcelable.Creator<SSMonth>() {
-        public SSMonth createFromParcel(Parcel source) {
-            return new SSMonth(source);
+    public static final Parcelable.Creator<SCMonth> CREATOR = new Parcelable.Creator<SCMonth>() {
+        public SCMonth createFromParcel(Parcel source) {
+            return new SCMonth(source);
         }
 
-        public SSMonth[] newArray(int size) {
-            return new SSMonth[size];
+        public SCMonth[] newArray(int size) {
+            return new SCMonth[size];
         }
     };
 }

@@ -6,11 +6,11 @@ import android.graphics.Paint;
 /**
  * Created by tubingbing on 16/1/28.
  */
-public abstract class SSDayDrawer {
+public abstract class DayDrawer {
 
-    protected abstract void init(SSMonthView ssMonthView);
+    protected abstract void init(MonthView monthView);
 
-    protected abstract void draw(SSMonth ssMonth, FullDay ssDay, Canvas canvas, int row, int col, int dayViewWidth, int dayViewHeight);
+    protected abstract void draw(Canvas canvas);
 
     protected float getX(String day, int col, int dayViewWidth, Paint paint){
         return getCenterX(col, dayViewWidth) - paint.measureText(day) / 2;

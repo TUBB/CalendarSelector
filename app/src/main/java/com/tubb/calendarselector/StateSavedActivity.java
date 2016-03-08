@@ -12,10 +12,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tubb.calendarselector.library.CalendarSelector;
-import com.tubb.calendarselector.library.DateUtils;
+import com.tubb.calendarselector.library.SCDateUtils;
 import com.tubb.calendarselector.library.FullDay;
-import com.tubb.calendarselector.library.SSMonth;
-import com.tubb.calendarselector.library.SSMonthView;
+import com.tubb.calendarselector.library.SCMonth;
+import com.tubb.calendarselector.library.MonthView;
 import com.tubb.calendarselector.library.SegmentSelectListener;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class StateSavedActivity extends AppCompatActivity {
 
     CalendarSelector processor;
     RecyclerView rvCalendar;
-    List<SSMonth> data;
+    List<SCMonth> data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +36,9 @@ public class StateSavedActivity extends AppCompatActivity {
         if(savedInstanceState != null){
             processor = savedInstanceState.getParcelable("selector");
         }
-        if(processor != null){
+        if(processor != null){ // restore data
             data = processor.getDataList();
-        }else{
+        }else{ // generate data
             data = getData();
             processor = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
         }
@@ -54,7 +54,7 @@ public class StateSavedActivity extends AppCompatActivity {
 
             @Override
             public boolean onInterceptSelect(FullDay selectingDay) {
-                if(DateUtils.isToday(selectingDay.getYear(), selectingDay.getMonth(), selectingDay.getDay())){
+                if(SCDateUtils.isToday(selectingDay.getYear(), selectingDay.getMonth(), selectingDay.getDay())){
                     Toast.makeText(StateSavedActivity.this, "Today can't be selected", Toast.LENGTH_SHORT).show();
                     return true;
                 }
@@ -63,7 +63,7 @@ public class StateSavedActivity extends AppCompatActivity {
 
             @Override
             public boolean onInterceptSelect(FullDay startDay, FullDay endDay) {
-                int differDays = DateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
+                int differDays = SCDateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
                         endDay.getYear(), endDay.getMonth(), endDay.getDay());
                 Log.d(TAG, "segment select " + startDay.toString() + " : " + endDay.toString());
                 Log.d(TAG, "differDays " + differDays);
@@ -77,23 +77,15 @@ public class StateSavedActivity extends AppCompatActivity {
         rvCalendar.setAdapter(new CalendarAdpater(data));
     }
 
-    public List<SSMonth> getData() {
-        List<SSMonth> data = new ArrayList<>();
-        for (int i = 1; i <= 12; i++) {
-            data.add(new SSMonth(2016, i));
-        }
-        for (int i = 1; i <= 12; i++) {
-            data.add(new SSMonth(2017, i));
-        }
-        return data;
-
+    public List<SCMonth> getData() {
+        return SCDateUtils.generateMonths(2016, 2017);
     }
 
     class CalendarAdpater extends RecyclerView.Adapter<CalendarViewHolder>{
 
-        List<SSMonth> months;
+        List<SCMonth> months;
 
-        public CalendarAdpater(List<SSMonth> months){
+        public CalendarAdpater(List<SCMonth> months){
             this.months = months;
         }
 
@@ -104,10 +96,10 @@ public class StateSavedActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(CalendarViewHolder holder, int position) {
-            SSMonth ssMonth = months.get(position);
-            holder.tvMonthTitle.setText(String.format("%d-%d", ssMonth.getYear(), ssMonth.getMonth()));
-            holder.ssMonthView.setSsMonth(ssMonth);
-            processor.bind(rvCalendar, holder.ssMonthView, position);
+            SCMonth SCMonth = months.get(position);
+            holder.tvMonthTitle.setText(String.format("%d-%d", SCMonth.getYear(), SCMonth.getMonth()));
+            holder.monthView.setSCMonth(SCMonth);
+            processor.bind(rvCalendar, holder.monthView, position);
         }
 
         @Override
@@ -119,12 +111,12 @@ public class StateSavedActivity extends AppCompatActivity {
     class CalendarViewHolder extends RecyclerView.ViewHolder{
 
         TextView tvMonthTitle;
-        SSMonthView ssMonthView;
+        MonthView monthView;
 
         public CalendarViewHolder(View itemView) {
             super(itemView);
             tvMonthTitle = (TextView) itemView.findViewById(R.id.tvMonthTitle);
-            ssMonthView = (SSMonthView) itemView.findViewById(R.id.ssMv);
+            monthView = (MonthView) itemView.findViewById(R.id.ssMv);
         }
     }
 

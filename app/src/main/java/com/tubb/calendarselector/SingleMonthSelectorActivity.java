@@ -9,12 +9,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tubb.calendarselector.library.SingleMonthSelector;
-import com.tubb.calendarselector.library.DateUtils;
+import com.tubb.calendarselector.library.SCDateUtils;
 import com.tubb.calendarselector.library.FullDay;
 import com.tubb.calendarselector.library.IntervalSelectListener;
-import com.tubb.calendarselector.library.SSMonth;
+import com.tubb.calendarselector.library.SCMonth;
 import com.tubb.calendarselector.library.CalendarSelector;
-import com.tubb.calendarselector.library.SSMonthView;
+import com.tubb.calendarselector.library.MonthView;
 import com.tubb.calendarselector.library.SegmentSelectListener;
 
 import java.util.List;
@@ -22,28 +22,28 @@ import java.util.List;
 public class SingleMonthSelectorActivity extends AppCompatActivity {
 
     private static final String TAG = "mv";
-    SSMonth ssMonth;
+    SCMonth SCMonth;
     private SingleMonthSelector processor;
-    private SSMonthView ssMonthView;
+    private MonthView monthView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_month_selector);
-        ssMonthView = (SSMonthView) findViewById(R.id.ssMv);
+        monthView = (MonthView) findViewById(R.id.ssMv);
         TextView tvMonthTitle = (TextView) findViewById(R.id.tvMonthTitle);
         if(savedInstanceState != null){
-            ssMonth = savedInstanceState.getParcelable("month");
+            SCMonth = savedInstanceState.getParcelable("month");
         }
-        if(ssMonth == null)
-            ssMonth = new SSMonth(2016, 1);
-        tvMonthTitle.setText(ssMonth.toString());
+        if(SCMonth == null)
+            SCMonth = new SCMonth(2016, 1);
+        tvMonthTitle.setText(SCMonth.toString());
         segmentMode();
     }
 
     private void segmentMode(){
-        ssMonth.getSelectedDays().clear();
-        ssMonthView.setSsMonth(ssMonth);
+        SCMonth.getSelectedDays().clear();
+        monthView.setSCMonth(SCMonth);
         processor = new SingleMonthSelector(CalendarSelector.Mode.SEGMENT);
         processor.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
@@ -53,7 +53,7 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
 
             @Override
             public boolean onInterceptSelect(FullDay selectingDay) {
-                if(DateUtils.isToday(selectingDay.getYear(), selectingDay.getMonth(), selectingDay.getDay())){
+                if(SCDateUtils.isToday(selectingDay.getYear(), selectingDay.getMonth(), selectingDay.getDay())){
                     Toast.makeText(SingleMonthSelectorActivity.this, "Today can't be selected", Toast.LENGTH_SHORT).show();
                     return true;
                 }
@@ -62,7 +62,7 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
 
             @Override
             public boolean onInterceptSelect(FullDay startDay, FullDay endDay) {
-                int differDays = DateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
+                int differDays = SCDateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
                         endDay.getYear(), endDay.getMonth(), endDay.getDay());
                 Log.d(TAG, "differDays " + differDays);
                 if(differDays > 5) {
@@ -73,12 +73,12 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
             }
 
         });
-        processor.bind(ssMonthView);
+        processor.bind(monthView);
     }
 
     private void intervalMode(){
-        ssMonth.getSelectedDays().clear();
-        ssMonthView.setSsMonth(ssMonth);
+        SCMonth.getSelectedDays().clear();
+        monthView.setSCMonth(SCMonth);
         processor = new SingleMonthSelector(CalendarSelector.Mode.INTERVAL);
         processor.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
@@ -95,7 +95,7 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
                 return super.onInterceptSelect(selectedDays, selectingDay);
             }
         });
-        processor.bind(ssMonthView);
+        processor.bind(monthView);
     }
 
     @Override
