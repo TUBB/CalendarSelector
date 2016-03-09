@@ -32,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.bt_savedstate:
                 startActivity(new Intent(this, StateSavedActivity.class));
                 break;
+            case R.id.bt_vp:
+                startActivity(new Intent(this, ViewPagerActivity.class));
+                break;
         }
     }
 }

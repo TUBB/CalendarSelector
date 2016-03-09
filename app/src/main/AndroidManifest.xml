@@ -24,6 +24,7 @@
         <activity android:name=".CalendarSelectorActivity"/>
         <activity android:name=".CustomDrawerActivity"/>
         <activity android:name=".StateSavedActivity"/>
+        <activity android:name=".ViewPagerActivity"/>
     </application>
 
 </manifest>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.tubb.calendarselector.library.MonthView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sc="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scMv"
+    android:layout_width="wrap_content"
+    android:layout_height="250dp"
+    sc:sc_draw_monthday="false"
+    sc:sc_day_textsize="@dimen/t_16"
+    sc:sc_month="2016-1"
+    sc:sc_selected_days="11,15,28"
+    />
