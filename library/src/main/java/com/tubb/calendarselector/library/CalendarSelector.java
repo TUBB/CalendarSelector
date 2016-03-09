@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -132,16 +133,29 @@ public class CalendarSelector extends SingleMonthSelector {
     }
 
     private void invalidate(ViewGroup container, int position){
-        View childView = container.getChildAt(position);
-        if(childView == null){
-            if(container instanceof RecyclerView){
-                RecyclerView rv = (RecyclerView)container;
-                rv.getAdapter().notifyItemChanged(position);
+        if(position >= 0) {
+            View childView = container.getChildAt(position);
+            if(childView == null){
+                if(container instanceof RecyclerView){
+                    RecyclerView rv = (RecyclerView)container;
+                    rv.getAdapter().notifyItemChanged(position);
+                }else{
+                    Log.e(TAG, "the container view is not expected ViewGroup");
+                }
             }else{
-                throw new IllegalArgumentException("the container view is not expected ViewGroup");
+                List<View> unvisited = new ArrayList<>();
+                unvisited.add(childView);
+                while (!unvisited.isEmpty()) {
+                    View child = unvisited.remove(0);
+                    if (!(child instanceof ViewGroup)) {
+                        if(child instanceof MonthView) child.invalidate();
+                        continue;
+                    }
+                    ViewGroup group = (ViewGroup) child;
+                    final int childCount = group.getChildCount();
+                    for (int i=0; i<childCount; i++) unvisited.add(group.getChildAt(i));
+                }
             }
-        }else{
-            childView.invalidate();
         }
     }
 
