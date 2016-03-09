@@ -9,9 +9,9 @@ import java.util.List;
  */
 public class SCDateUtils {
 
-    private static final String[] SUNDAY_WEEKS = new String[]{"日", "一", "二", "三", "四", "五", "六"};
-    private static final String[] MONDAY_WEEKS = new String[]{"一", "二", "三", "四", "五", "六", "日"};
-    private static final String[] SATURDAY_WEEKS = new String[]{"六", "日", "一", "二", "三", "四", "五"};
+    private static final String[] SUNDAY_WEEKS = new String[]{"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+    private static final String[] MONDAY_WEEKS = new String[]{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
+    private static final String[] SATURDAY_WEEKS = new String[]{"SAT", "SUN", "MON", "TUE", "WED", "THU", "FRI"};
 
     public static int getCurrentDay(){
         Calendar calendar = Calendar.getInstance();
@@ -62,13 +62,13 @@ public class SCDateUtils {
     public static int getDayCountOfMonth(int year, int month){
         int[] arr = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
         int days = 0;
-        if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
-            arr[1] = 29; // 闰年2月29天
+        if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) { // leap year
+            arr[1] = 29;
         }
         try {
             days = arr[month - 1];
         } catch (Exception e) {
-            e.getStackTrace();
+            e.printStackTrace();
         }
         return days;
     }

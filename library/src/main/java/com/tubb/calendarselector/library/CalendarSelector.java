@@ -132,26 +132,16 @@ public class CalendarSelector extends SingleMonthSelector {
     }
 
     private void invalidate(ViewGroup container, int position){
-        if(position >= 0) {
-            View childView = container.getChildAt(position);
-            if(childView == null){
-                if(container instanceof RecyclerView){
-                    RecyclerView rv = (RecyclerView)container;
-                    rv.getAdapter().notifyItemChanged(position);
-                }else{
-                    Log.e(TAG, "the container view is not expected ViewGroup");
-                }
+        View childView = container.getChildAt(position);
+        if(childView == null){
+            if(container instanceof RecyclerView){
+                RecyclerView rv = (RecyclerView)container;
+                rv.getAdapter().notifyItemChanged(position);
             }else{
-                if(childView instanceof ViewGroup){
-                    ViewGroup vg = (ViewGroup) childView;
-                    for (int i = 0; i < vg.getChildCount(); i++) {
-                        View view = vg.getChildAt(i);
-                        if(view instanceof MonthView) view.invalidate();
-                    }
-                }else{
-                    if(childView instanceof MonthView) childView.invalidate();
-                }
+                throw new IllegalArgumentException("the container view is not expected ViewGroup");
             }
+        }else{
+            childView.invalidate();
         }
     }
 
