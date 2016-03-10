@@ -57,6 +57,67 @@ singleMonthSelector.bind(monthView);
 calendarSelector.bind(containerViewGroup, monthView, itemPosition);
 ```
 
+We support intercept select event, so you do something you like, such as define the limit dates
+
+segment mode
+
+```java
+selector = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
+selector.setSegmentSelectListener(new SegmentSelectListener() {
+    @Override
+    public void onSegmentSelect(FullDay startDay, FullDay endDay) {
+        Log.d(TAG, "segment select " + startDay.toString() + " : " + endDay.toString());
+    }
+
+    @Override
+    public boolean onInterceptSelect(FullDay selectingDay) { // one day intercept
+        if(SCDateUtils.isToday(selectingDay.getYear(), selectingDay.getMonth(), selectingDay.getDay())){
+            Toast.makeText(CalendarSelectorActivity.this, "Today can't be selected", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return super.onInterceptSelect(selectingDay);
+    }
+
+    @Override
+    public boolean onInterceptSelect(FullDay startDay, FullDay endDay) { // segment days intercept
+        int differDays = SCDateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
+                endDay.getYear(), endDay.getMonth(), endDay.getDay());
+        Log.d(TAG, "differDays " + differDays);
+        if(differDays > 10) {
+            Toast.makeText(CalendarSelectorActivity.this, "Selected days can't more than 10", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return super.onInterceptSelect(startDay, endDay);
+    }
+
+    @Override
+    public void selectedSameDay(FullDay sameDay) { // selected the same day
+        super.selectedSameDay(sameDay);
+    }
+});
+```
+
+interval mode
+
+```java
+selector = new SingleMonthSelector(CalendarSelector.Mode.INTERVAL);
+selector.setIntervalSelectListener(new IntervalSelectListener() {
+    @Override
+    public void onIntervalSelect(List<FullDay> selectedDays) {
+        Log.d(TAG, "interval selected days " + selectedDays.toString());
+    }
+
+    @Override
+    public boolean onInterceptSelect(List<FullDay> selectedDays, FullDay selectingDay) {
+        if(selectedDays.size() >= 5) {
+            Toast.makeText(SingleMonthSelectorActivity.this, "Selected days can't more than 5", Toast.LENGTH_LONG).show();
+            return true;
+        }
+        return super.onInterceptSelect(selectedDays, selectingDay);
+    }
+});
+```
+
 [SingleMonthSelector][2] and [CalendarSelector][3] support two selector mode ( `SEGMENT` and `INTERVAL` ) and state saved, restore seletor state
 
 More usage detail please see [SingleMonthSelectorActivity][4] and [CalendarSelectorActivity][5]

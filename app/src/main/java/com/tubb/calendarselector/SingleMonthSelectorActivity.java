@@ -23,7 +23,7 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
 
     private static final String TAG = "mv";
     SCMonth SCMonth;
-    private SingleMonthSelector processor;
+    private SingleMonthSelector selector;
     private MonthView monthView;
 
     @Override
@@ -44,8 +44,8 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
     private void segmentMode(){
         SCMonth.getSelectedDays().clear();
         monthView.setSCMonth(SCMonth);
-        processor = new SingleMonthSelector(CalendarSelector.Mode.SEGMENT);
-        processor.setSegmentSelectListener(new SegmentSelectListener() {
+        selector = new SingleMonthSelector(CalendarSelector.Mode.SEGMENT);
+        selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {
                 Log.d(TAG, "segment select " + startDay.toString() + " : " + endDay.toString());
@@ -73,14 +73,14 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
             }
 
         });
-        processor.bind(monthView);
+        selector.bind(monthView);
     }
 
     private void intervalMode(){
         SCMonth.getSelectedDays().clear();
         monthView.setSCMonth(SCMonth);
-        processor = new SingleMonthSelector(CalendarSelector.Mode.INTERVAL);
-        processor.setIntervalSelectListener(new IntervalSelectListener() {
+        selector = new SingleMonthSelector(CalendarSelector.Mode.INTERVAL);
+        selector.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
             public void onIntervalSelect(List<FullDay> selectedDays) {
                 Log.d(TAG, "interval selected days " + selectedDays.toString());
@@ -95,7 +95,7 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
                 return super.onInterceptSelect(selectedDays, selectingDay);
             }
         });
-        processor.bind(monthView);
+        selector.bind(monthView);
     }
 
     @Override

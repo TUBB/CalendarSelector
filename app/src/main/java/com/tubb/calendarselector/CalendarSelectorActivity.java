@@ -27,7 +27,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
 
     private static final String TAG = "mv";
 
-    CalendarSelector processor;
+    CalendarSelector selector;
     RecyclerView rvCalendar;
     List<SCMonth> data;
 
@@ -36,7 +36,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scrolling);
         if(savedInstanceState != null)
-            processor = savedInstanceState.getParcelable("selector");
+            selector = savedInstanceState.getParcelable("selector");
         rvCalendar = (RecyclerView) findViewById(R.id.rvCalendar);
         rvCalendar.setLayoutManager(new LinearLayoutManager(this));
         data = getData();
@@ -51,15 +51,15 @@ public class CalendarSelectorActivity extends AppCompatActivity {
         for (SCMonth month:data)
             month.getSelectedDays().clear();
 
-        processor = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
-        processor.setSegmentSelectListener(new SegmentSelectListener() {
+        selector = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
+        selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {
                 Log.d(TAG, "segment select " + startDay.toString() + " : " + endDay.toString());
             }
 
             @Override
-            public boolean onInterceptSelect(FullDay selectingDay) {
+            public boolean onInterceptSelect(FullDay selectingDay) { // one day intercept
                 if(SCDateUtils.isToday(selectingDay.getYear(), selectingDay.getMonth(), selectingDay.getDay())){
                     Toast.makeText(CalendarSelectorActivity.this, "Today can't be selected", Toast.LENGTH_SHORT).show();
                     return true;
@@ -68,7 +68,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onInterceptSelect(FullDay startDay, FullDay endDay) {
+            public boolean onInterceptSelect(FullDay startDay, FullDay endDay) { // segment days intercept
                 int differDays = SCDateUtils.countDays(startDay.getYear(), startDay.getMonth(), startDay.getDay(),
                         endDay.getYear(), endDay.getMonth(), endDay.getDay());
                 Log.d(TAG, "differDays " + differDays);
@@ -77,6 +77,11 @@ public class CalendarSelectorActivity extends AppCompatActivity {
                     return true;
                 }
                 return super.onInterceptSelect(startDay, endDay);
+            }
+
+            @Override
+            public void selectedSameDay(FullDay sameDay) { // selected the same day
+                super.selectedSameDay(sameDay);
             }
         });
         rvCalendar.setAdapter(new CalendarAdpater(data));
@@ -88,8 +93,8 @@ public class CalendarSelectorActivity extends AppCompatActivity {
     private void intervalMode(){
         for (SCMonth month:data)
             month.getSelectedDays().clear();
-        processor = new CalendarSelector(data, CalendarSelector.Mode.INTERVAL);
-        processor.setIntervalSelectListener(new IntervalSelectListener() {
+        selector = new CalendarSelector(data, CalendarSelector.Mode.INTERVAL);
+        selector.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
             public void onIntervalSelect(List<FullDay> selectedDays) {
                 Log.d(TAG, "interval selected days " + selectedDays.toString());
@@ -129,7 +134,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
             SCMonth SCMonth = months.get(position);
             holder.tvMonthTitle.setText(String.format("%d-%d", SCMonth.getYear(), SCMonth.getMonth()));
             holder.monthView.setSCMonth(SCMonth);
-            processor.bind(rvCalendar, holder.monthView, position);
+            selector.bind(rvCalendar, holder.monthView, position);
         }
 
         @Override
@@ -175,7 +180,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable("selector", processor);
+        outState.putParcelable("selector", selector);
         super.onSaveInstanceState(outState);
     }
 
