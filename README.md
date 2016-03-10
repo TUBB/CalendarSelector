@@ -118,7 +118,7 @@ selector.setIntervalSelectListener(new IntervalSelectListener() {
 });
 ```
 
-[SingleMonthSelector][2] and [CalendarSelector][3] support two selector mode ( `SEGMENT` and `INTERVAL` ) and state saved, restore seletor state
+[SingleMonthSelector][2] and [CalendarSelector][3] support two selector mode ( `SEGMENT` and `INTERVAL` ) and state saved, restore selector state
 
 More usage detail please see [SingleMonthSelectorActivity][4] and [CalendarSelectorActivity][5]
 

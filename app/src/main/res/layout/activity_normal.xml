@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        tools:text="yyyy-mm-dd"
+        tools:text="2016-03"
         android:textSize="20sp"
         android:gravity="center"
         android:textColor="@color/c_33ccff"
