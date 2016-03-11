@@ -127,7 +127,6 @@ public class MonthView extends View{
         prevMonth = SCDateUtils.prevMonth(SCMonth.getYear(), SCMonth.getMonth());
         int dayCountOfPrevMonth = SCDateUtils.getDayCountOfMonth(prevMonth.getYear(), prevMonth.getMonth());
         nextMonth = SCDateUtils.nextMonth(SCMonth.getYear(), SCMonth.getMonth());
-
         int dayOfWeekInMonth = SCDateUtils.mapDayOfWeekInMonth(SCDateUtils.getDayOfWeekInMonth(SCMonth.getYear(), SCMonth.getMonth()), firstDayOfWeek);
 //        Log.d(TAG, SCMonth.toString()+" dayOfWeekInMonth:"+dayOfWeekInMonth);
         int dayCountOfMonth = SCDateUtils.getDayCountOfMonth(SCMonth.getYear(), SCMonth.getMonth());
