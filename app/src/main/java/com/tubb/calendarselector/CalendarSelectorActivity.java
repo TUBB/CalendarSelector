@@ -113,7 +113,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
     }
 
     public List<SCMonth> getData() {
-        return SCDateUtils.generateMonths(2016, 3, 2017, 6);
+        return SCDateUtils.generateMonths(2016, 2018);
     }
 
     class CalendarAdpater extends RecyclerView.Adapter<CalendarViewHolder>{

@@ -16,6 +16,7 @@ import java.util.List;
 public class CalendarSelector extends SingleMonthSelector {
 
     private static final String TAG = "mv";
+    private static final int LISTENER_HOLDER_TAG_KEY = "LISTENER_HOLDER_TAG_KEY".hashCode();
     protected List<SCMonth> dataList;
 
     public CalendarSelector(List<SCMonth> dataList, Mode mode){
@@ -31,22 +32,37 @@ public class CalendarSelector extends SingleMonthSelector {
         if(this.mode == Mode.SEGMENT && this.segmentSelectListener == null)
             throw new IllegalArgumentException("Please set SegmentSelectListener for Mode.SEGMENT mode");
         if(container instanceof ListView) throw new IllegalArgumentException("Not support ListView yet");
-        monthView.setMonthDayClickListener(new MonthView.OnMonthDayClickListener() {
-            @Override
-            public void onMonthDayClick(FullDay day) {
-                if(!SCDateUtils.isMonthDay(monthView.getSCMonth().getYear(), monthView.getSCMonth().getMonth(),
-                        day.getYear(), day.getMonth()))
-                    return;
-                switch (mode){
-                    case INTERVAL:
-                        intervalSelect(monthView, day);
-                        break;
-                    case SEGMENT:
-                        segmentSelect(container, monthView, day, position);
-                        break;
-                }
+        ListenerHolder listenerHolder = (ListenerHolder) monthView.getTag(LISTENER_HOLDER_TAG_KEY);
+        if(listenerHolder == null){
+            listenerHolder = new ListenerHolder();
+            monthView.setTag(LISTENER_HOLDER_TAG_KEY, listenerHolder);
+        }
+        listenerHolder.container = container;
+        listenerHolder.monthView = monthView;
+        listenerHolder.position = position;
+        monthView.setMonthDayClickListener(listenerHolder);
+    }
+
+    class ListenerHolder implements MonthView.OnMonthDayClickListener{
+
+        ViewGroup container;
+        MonthView monthView;
+        int position;
+
+        @Override
+        public void onMonthDayClick(FullDay day) {
+            if(!SCDateUtils.isMonthDay(monthView.getSCMonth().getYear(), monthView.getSCMonth().getMonth(),
+                    day.getYear(), day.getMonth()))
+                return;
+            switch (mode){
+                case INTERVAL:
+                    intervalSelect(monthView, day);
+                    break;
+                case SEGMENT:
+                    segmentSelect(container, monthView, day, position);
+                    break;
             }
-        });
+        }
     }
 
     private void segmentSelect(ViewGroup container, MonthView monthView, FullDay ssDay, int position) {
