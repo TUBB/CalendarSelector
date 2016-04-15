@@ -25,7 +25,7 @@ Usage
 Add to dependencies
 
 ```groovy
-compile 'com.tubb.calendarselector.library:calendar-selector:1.5'
+compile 'com.tubb.calendarselector.library:calendar-selector:0.1.0'
 ```
 
 Just use [MonthView][1], [MonthView][1] is a custom view for display month's days
@@ -261,7 +261,8 @@ We include several attrs for [MonthView][1]
 Note
 ====
 
-If you have any question, it will be great if you commit some issues
+If you have any question, just commit some issues
+Thanks!
 
 
 License
@@ -286,6 +287,8 @@ License
  [1]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/MonthView.java
  [2]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/SingleMonthSelector.java
  [3]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/CalendarSelector.java
- [4]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/SingleMonthSelectorActivity.java
- [5]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/CalendarSelectorActivity.java
- [6]: 
+ [4]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/normal/SingleMonthSelectorActivity.java
+ [5]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/normal/CalendarSelectorActivity.java
+ [6]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/normal/StateSavedActivity.java
+ [7]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/custom/DecorDayViewInflater.java
+ [8]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/custom/AnimDayViewInflater.java
