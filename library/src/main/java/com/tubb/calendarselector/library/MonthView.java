@@ -2,16 +2,17 @@ package com.tubb.calendarselector.library;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+
+import com.tubb.calendarselector.custom.DayViewHolder;
+import com.tubb.calendarselector.custom.DayViewInflater;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,41 +20,38 @@ import java.util.List;
 /**
  * Created by tubingbing on 16/1/18.
  */
-public class MonthView extends View{
+public class MonthView extends FrameLayout{
 
     private static final String TAG = "mv";
 
     public static final int ROW_COUNT = 6;
     public static final int COL_COUNT = 7;
 
-    private boolean drawMonthDay = false;
+    private boolean neededRelayout = false;
+    private boolean drawMonthDay = true;
     private int realRowCount = ROW_COUNT;
-    private boolean neededLayout = false;
     protected Context mContext;
     protected DisplayMetrics mDisplayMetrics;
-    private float mDownX;
-    private float mDownY;
-    private int mTouchSlop;
-    private int todayColor;
-    private int prevMonthDayColor;
-    private int nextMonthDayColor;
-    private int normalDayColor;
-    private int selectedDayColor;
-    private int selectedDayCircleColor;
-    private int daySize;
+    // the first day of week (support sunday,monday,saturday)
     private int firstDayOfWeek;
     private OnMonthDayClickListener mMonthDayClickListener;
 
-    private List<List<FullDay>> monthDays;
-    private DayDrawer dayDrawer;
+    private FullDay[][] monthDays = new FullDay[ROW_COUNT][COL_COUNT];
+    private DayViewHolder[][] monthDayViewHolders = new DayViewHolder[ROW_COUNT][COL_COUNT];
+    private DayViewInflater dayInflater;
+    private List<DayViewInflater.Decor> horizontalDecors = new ArrayList<>(ROW_COUNT+1);
+    private List<DayViewInflater.Decor> verticalDecors = new ArrayList<>(COL_COUNT+1);
 
-    private int mWidth;
-    private int mHeight;
+    private int mDefaultWidth;
+    private int mDefaultHeight;
     private int dayWidth;
     private int dayHeight;
-    private SCMonth SCMonth;
+    private SCMonth scMonth;
     private SCMonth prevMonth;
     private SCMonth nextMonth;
+
+    // the first day of month is which week's day
+    private int firstdayOfWeekPosInMonth;
 
     public MonthView(Context context) {
         super(context);
@@ -66,172 +64,258 @@ public class MonthView extends View{
 
     public MonthView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        setSaveEnabled(true);
+        setWillNotDraw(false);
         mContext = context;
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MonthView, 0, defStyleAttr);
-        drawMonthDay = a.getBoolean(R.styleable.MonthView_sc_draw_monthday, false);
-        todayColor = a.getColor(R.styleable.MonthView_sc_today_color, ContextCompat.getColor(mContext, R.color.c_ff6666));
-        prevMonthDayColor = a.getColor(R.styleable.MonthView_sc_prevmonthday_color, ContextCompat.getColor(mContext, R.color.c_999999));
-        nextMonthDayColor = a.getColor(R.styleable.MonthView_sc_nextmonthday_color, ContextCompat.getColor(mContext, R.color.c_999999));
-        normalDayColor = a.getColor(R.styleable.MonthView_sc_normalday_color, ContextCompat.getColor(mContext, R.color.c_000000));
-        selectedDayColor = a.getColor(R.styleable.MonthView_sc_selectedday_color, ContextCompat.getColor(mContext, R.color.c_ffffff));
-        selectedDayCircleColor = a.getColor(R.styleable.MonthView_sc_selectedday_bgcolor, ContextCompat.getColor(mContext, R.color.c_33ccff));
-        daySize = a.getDimensionPixelSize(R.styleable.MonthView_sc_day_textsize, getResources().getDimensionPixelSize(R.dimen.t_16));
+        drawMonthDay = a.getBoolean(R.styleable.MonthView_sc_draw_monthday_only, drawMonthDay);
         firstDayOfWeek = a.getInt(R.styleable.MonthView_sc_firstday_week, SCMonth.SUNDAY_OF_WEEK);
+        mDisplayMetrics = new DisplayMetrics();
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        wm.getDefaultDisplay().getMetrics(mDisplayMetrics);
+        mDefaultWidth = mDisplayMetrics.widthPixels;
+        mDefaultHeight = mDefaultWidth / 7 * 6;
+        dayInflater = new DefaultDayViewInflater(getContext());
         if(isInEditMode()){
             String testMonth = a.getString(R.styleable.MonthView_sc_month);
             String selectedDays = a.getString(R.styleable.MonthView_sc_selected_days);
             initEditorMode(testMonth, selectedDays);
         }
         a.recycle();
-        mDisplayMetrics = new DisplayMetrics();
-        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(mDisplayMetrics);
-        mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-        dayDrawer = new DefaultDayDrawer(mContext);
-        dayDrawer.init(this);
     }
 
-    public void setSsMonth(SCMonth SCMonth, DayDrawer dayDrawer){
-        if(SCMonth.getYear() <=0 || SCMonth.getMonth() <=0 || SCMonth.getMonth() > 12)
+    public void setSCMonth(SCMonth scMonth, DayViewInflater dayInflater){
+        if(scMonth.getYear() <=0 || scMonth.getMonth() <=0 || scMonth.getMonth() > 12)
             throw new IllegalArgumentException("Invalidate year or month");
-        if(dayDrawer != null){
-            this.dayDrawer = dayDrawer;
-            this.dayDrawer.init(this);
+        if(dayInflater != null){
+            this.dayInflater = dayInflater;
         }
-        this.SCMonth = SCMonth;
+        this.scMonth = scMonth;
         calculateDays();
-        if(neededLayout) requestLayout();
-        else invalidate();
-        neededLayout = false;
+        if(getChildCount() > 0){
+            refresh();
+        }else{
+            // wait for measure finish
+            if(!isInEditMode()){
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        createDayViews();
+                    }
+                });
+            }else{
+                createDayViews();
+            }
+        }
+        // when use in the recyclerview, each item's height may be different, we should requestLayout again
+        if(neededRelayout) {
+            requestLayout();
+            neededRelayout = false;
+        }
+    }
+
+    private void createDayViews() {
+
+        for (int row = 0; row < ROW_COUNT; row++){
+            for (int col = 0; col < COL_COUNT; col++){
+                DayViewHolder dayViewHolder = dayInflater.inflateDayView(this);
+                View dayView = dayViewHolder.getDayView();
+                dayView.setLayoutParams(new ViewGroup.LayoutParams(
+                        dayWidth,
+                        dayHeight));
+                addView(dayView);
+                monthDayViewHolders[row][col] = dayViewHolder;
+                drawDays(row, col, dayView);
+                dayView.setClickable(true);
+                final int clickRow = row;
+                final int clickCol = col;
+                dayView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        measureClickCell(clickRow, clickCol);
+                    }
+                });
+            }
+        }
+
+        for (int row = 0; row < ROW_COUNT+1; row++){
+            DayViewInflater.Decor horizontalDecor = dayInflater.inflateHorizontalDecor(this, row, realRowCount + 1);
+            if(horizontalDecor == null) horizontalDecor = new DayViewInflater.Decor(new View(mContext));
+            horizontalDecors.add(horizontalDecor);
+            addView(horizontalDecor.getDecorView()==null?new View(mContext):horizontalDecor.getDecorView());
+        }
+
+        for (int col = 0; col < COL_COUNT+1; col++){
+            DayViewInflater.Decor verticalDecor = dayInflater.inflateVerticalDecor(this, col, COL_COUNT+1);
+            if(verticalDecor == null) verticalDecor = new DayViewInflater.Decor(new View(mContext));
+            verticalDecors.add(verticalDecor);
+            addView(verticalDecor.getDecorView()==null?new View(mContext):verticalDecor.getDecorView());
+        }
+    }
+
+    private void drawDays(final int row, final int col, View dayView) {
+        FullDay fullDay = monthDays[row][col];
+        DayViewHolder dayViewHolder = monthDayViewHolders[row][col];
+        boolean isPrevMonthDay = SCDateUtils.isPrevMonthDay(
+                scMonth.getYear(), scMonth.getMonth(),
+                fullDay.getYear(), fullDay.getMonth());
+        boolean isNextMonthDay = SCDateUtils.isNextMonthDay(
+                scMonth.getYear(), scMonth.getMonth(),
+                fullDay.getYear(), fullDay.getMonth());
+        boolean isSelected = getSelectedDays().contains(fullDay);
+        if(drawMonthDay){
+            if(isPrevMonthDay || isNextMonthDay){
+                dayView.setVisibility(View.INVISIBLE);
+            }else{
+                dayView.setVisibility(View.VISIBLE);
+                dayViewHolder.setCurrentMonthDayText(fullDay, isSelected);
+            }
+        }else{
+            dayView.setVisibility(View.VISIBLE);
+            if(isPrevMonthDay){
+                dayViewHolder.setPrevMonthDayText(fullDay);
+            }else if(isNextMonthDay){
+                dayViewHolder.setNextMonthDayText(fullDay);
+            }else{
+                dayViewHolder.setCurrentMonthDayText(fullDay, isSelected);
+            }
+        }
+    }
+
+    private void calculateDays() {
+
+        prevMonth = SCDateUtils.prevMonth(scMonth.getYear(), scMonth.getMonth());
+        int dayCountOfPrevMonth = SCDateUtils.getDayCountOfMonth(prevMonth.getYear(), prevMonth.getMonth());
+        nextMonth = SCDateUtils.nextMonth(scMonth.getYear(), scMonth.getMonth());
+        firstdayOfWeekPosInMonth = SCDateUtils.mapDayOfWeekInMonth(SCDateUtils.getDayOfWeekInMonth(scMonth.getYear(), scMonth.getMonth()), firstDayOfWeek);
+//        Log.e(TAG, "firstdayOfWeekPosInMonth:"+firstdayOfWeekPosInMonth);
+        int dayCountOfMonth = SCDateUtils.getDayCountOfMonth(scMonth.getYear(), scMonth.getMonth());
+
+        int realRow = 0;
+        int day = 1;
+        for (int row = 0; row < ROW_COUNT; row++){
+            boolean isAllRowEmpty = true;
+            for (int col = 1; col <= COL_COUNT; col++){
+                int monthPosition = col + row * COL_COUNT;
+                if(monthPosition >= firstdayOfWeekPosInMonth
+                        && monthPosition < firstdayOfWeekPosInMonth + dayCountOfMonth){ // current month
+                    FullDay currentMonthDay = new FullDay(scMonth.getYear(), scMonth.getMonth(), day);
+                    monthDays[row][col-1] = currentMonthDay;
+                    day++;
+                    isAllRowEmpty = false;
+                }else if(monthPosition < firstdayOfWeekPosInMonth){ // prev month
+                    int prevDay = dayCountOfPrevMonth - (firstdayOfWeekPosInMonth - 1 - monthPosition);
+                    FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
+                    monthDays[row][col-1] = prevMonthDay;
+                }else if(monthPosition >= firstdayOfWeekPosInMonth + dayCountOfMonth){ // next month
+                    FullDay nextMonthDay = new FullDay(nextMonth.getYear(), nextMonth.getMonth(),
+                            monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
+                    monthDays[row][col-1] = nextMonthDay;
+                }
+            }
+            if(!isAllRowEmpty) realRow++;
+        }
+
+        if(drawMonthDay) {
+            if(realRowCount != realRow) neededRelayout = true;
+            realRowCount = realRow;
+        } else{
+            // adjust display
+            if(firstdayOfWeekPosInMonth == 1
+                    && (realRow == (ROW_COUNT - 1) || realRow == (ROW_COUNT - 2))
+                    && isFirstRowFullCurrentMonthDays()){
+                FullDay[][] tempMonthdays = new FullDay[ROW_COUNT][COL_COUNT];
+                FullDay[] ssDays = new FullDay[COL_COUNT];
+                tempMonthdays[0] = ssDays;
+                for (int monthPosition = COL_COUNT - 1; monthPosition >= 0; monthPosition--){
+                    int prevDay = dayCountOfPrevMonth - monthPosition;
+                    FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
+                    ssDays[COL_COUNT - 1 - monthPosition] = prevMonthDay;
+                }
+                System.arraycopy(monthDays, 0, tempMonthdays, 1, 5);
+                monthDays = tempMonthdays;
+            }
+        }
+    }
+
+    private boolean isFirstRowFullCurrentMonthDays() {
+        FullDay[] ssDays = monthDays[0];
+        for (FullDay day : ssDays){
+            if(SCDateUtils.isPrevMonthDay(scMonth.getYear(), scMonth.getMonth(), day.getYear(), day.getMonth())) return false;
+        }
+        return true;
+    }
+
+    List<FullDay> getSelectedDays(){
+        return getSCMonth().getSelectedDays();
+    }
+
+    public void addSelectedDay(FullDay day){
+        getSelectedDays().add(day);
+        selectedDaysChanged();
+    }
+
+    public void addSelectedDays(List<FullDay> days){
+        getSelectedDays().addAll(days);
+        selectedDaysChanged();
+    }
+
+    public void removeSelectedDay(FullDay day){
+        getSelectedDays().remove(day);
+        selectedDaysChanged();
+    }
+
+    public void clearSelectedDays() {
+        getSelectedDays().clear();
+        selectedDaysChanged();
+    }
+
+    private void selectedDaysChanged(){
+        int decorSize = horizontalDecors.size() + verticalDecors.size();
+        for (int index = 0, count = getChildCount() - decorSize; index < count; index++){
+            View childView = getChildAt(index);
+            int row = index / COL_COUNT;
+            int col = index - row * COL_COUNT;
+            drawDays(row, col, childView);
+        }
     }
 
     /**
      * set the month
-     * @param SCMonth month obj
+     * @param scMonth month obj
      */
-    public void setSCMonth(SCMonth SCMonth){
-        this.setSsMonth(SCMonth, null);
+    public void setSCMonth(SCMonth scMonth){
+        this.setSCMonth(scMonth, null);
     }
 
-    public SCMonth getSCMonth() {
-        return SCMonth;
+    private SCMonth getSCMonth() {
+        return scMonth;
     }
 
     public void setMonthDayClickListener(OnMonthDayClickListener monthDayClickListener) {
         mMonthDayClickListener = monthDayClickListener;
     }
 
-    private void calculateDays() {
-
-        prevMonth = SCDateUtils.prevMonth(SCMonth.getYear(), SCMonth.getMonth());
-        int dayCountOfPrevMonth = SCDateUtils.getDayCountOfMonth(prevMonth.getYear(), prevMonth.getMonth());
-        nextMonth = SCDateUtils.nextMonth(SCMonth.getYear(), SCMonth.getMonth());
-        int dayOfWeekInMonth = SCDateUtils.mapDayOfWeekInMonth(SCDateUtils.getDayOfWeekInMonth(SCMonth.getYear(), SCMonth.getMonth()), firstDayOfWeek);
-//        Log.d(TAG, SCMonth.toString()+" dayOfWeekInMonth:"+dayOfWeekInMonth);
-        int dayCountOfMonth = SCDateUtils.getDayCountOfMonth(SCMonth.getYear(), SCMonth.getMonth());
-
-        monthDays = new ArrayList<>(ROW_COUNT);
-
-        int realRow = 0;
-        int day = 1;
-        for (int row = 0; row < ROW_COUNT; row++){
-            boolean isAllRowEmpty = true;
-            ArrayList<FullDay> days = new ArrayList<>(COL_COUNT);
-            for (int col = 1; col <= COL_COUNT; col++){
-                int monthPosition = col + row * COL_COUNT;
-                if(monthPosition >= dayOfWeekInMonth
-                        && monthPosition < dayOfWeekInMonth + dayCountOfMonth){ // current month
-                    FullDay currentMonthDay = new FullDay(SCMonth.getYear(), SCMonth.getMonth(), day);
-                    days.add(currentMonthDay);
-                    day++;
-                    isAllRowEmpty = false;
-                }else if(monthPosition < dayOfWeekInMonth){ // prev month
-                    int prevDay = dayCountOfPrevMonth - (dayOfWeekInMonth - 1 - monthPosition);
-                    FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
-                    days.add(prevMonthDay);
-                }else if(monthPosition >= dayOfWeekInMonth + dayCountOfMonth){ // next month
-                    FullDay nextMonthDay = new FullDay(nextMonth.getYear(), nextMonth.getMonth(),
-                            monthPosition - (dayOfWeekInMonth + dayCountOfMonth) + 1);
-                    days.add(nextMonthDay);
-                }
-            }
-            monthDays.add(days);
-            if(!isAllRowEmpty) realRow++;
-        }
-
-        if(drawMonthDay) {
-            if(realRowCount != realRow) neededLayout = true;
-            realRowCount = realRow;
-        } else{
-            // adjust display
-            if(dayOfWeekInMonth == 1
-                    && (realRow == (ROW_COUNT - 1) || realRow == (ROW_COUNT - 2))
-                    && isFirstRowFullCurrentMonthDays()){
-
-                monthDays.remove(monthDays.size() - 1);
-                List<FullDay> ssDays = new ArrayList<>(COL_COUNT);
-                for (int monthPosition = COL_COUNT - 1; monthPosition >= 0; monthPosition--){
-                    int prevDay = dayCountOfPrevMonth - monthPosition;
-                    FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
-                    ssDays.add(prevMonthDay);
-                }
-                monthDays.add(0, ssDays);
-            }
-        }
-//        Log.d(TAG, SCMonth.getYear()+"-"+SCMonth.getMonth()+" realRowCount:"+realRowCount);
+    public int getYear(){
+        return getSCMonth().getYear();
     }
 
-    private boolean isFirstRowFullCurrentMonthDays() {
-        List<FullDay> ssDays = monthDays.get(0);
-        for (FullDay day : ssDays){
-            if(SCDateUtils.isPrevMonthDay(SCMonth.getYear(), SCMonth.getMonth(), day.getYear(), day.getMonth())) return false;
-        }
-        return true;
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        if(mWidth == 0 || mHeight == 0)
-            throw new RuntimeException("the month view width or height is not correct");
-        if(this.SCMonth == null)
-            throw new RuntimeException("the SCMonth property must be set");
-        dayDrawer.draw(canvas);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mDownX = event.getX();
-                mDownY = event.getY();
-                break;
-            case MotionEvent.ACTION_UP:
-                float disX = event.getX() - mDownX;
-                float disY = event.getY() - mDownY;
-                if (Math.abs(disX) < mTouchSlop && Math.abs(disY) < mTouchSlop) {
-                    int col = (int) (mDownX / dayWidth);
-                    int row = (int) (mDownY / dayHeight);
-                    measureClickCell(row, col);
-                }
-                break;
-        }
-        return true;
+    public int getMonth(){
+        return getSCMonth().getMonth();
     }
 
     private void measureClickCell(int row, int col) {
         if (row >= realRowCount || col >= COL_COUNT){
             Log.d(TAG, "Out of bound");
         }else{
-            List<FullDay> ssDays = monthDays.get(row);
-            if(ssDays != null && ssDays.size() > 0){
-                FullDay ssDay = ssDays.get(col);
+            FullDay[] ssDays = monthDays[row];
+            if(ssDays != null && ssDays.length > 0){
+                FullDay ssDay = ssDays[col];
                 if(mMonthDayClickListener != null) {
-                    if (SCDateUtils.isMonthDay(SCMonth.getYear(), SCMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
-                        mMonthDayClickListener.onMonthDayClick(new FullDay(SCMonth.getYear(), SCMonth.getMonth(), ssDay.getDay()));
-                    else if(SCDateUtils.isPrevMonthDay(SCMonth.getYear(), SCMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
+                    if (SCDateUtils.isMonthDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
+                        mMonthDayClickListener.onMonthDayClick(new FullDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getDay()));
+                    else if(SCDateUtils.isPrevMonthDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
                         mMonthDayClickListener.onMonthDayClick(new FullDay(prevMonth.getYear(), prevMonth.getMonth(), ssDay.getDay()));
-                    else if(SCDateUtils.isNextMonthDay(SCMonth.getYear(), SCMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
+                    else if(SCDateUtils.isNextMonthDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
                         mMonthDayClickListener.onMonthDayClick(new FullDay(nextMonth.getYear(), nextMonth.getMonth(), ssDay.getDay()));
                 }
             }else{
@@ -244,19 +328,62 @@ public class MonthView extends View{
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        mWidth = getMeasurement(widthMeasureSpec, getMeasuredWidth());
-        mHeight = getMeasurement(heightMeasureSpec, getMeasuredHeight());
+        int width = getMeasurement(widthMeasureSpec, mDefaultWidth);
+        int height = getMeasurement(heightMeasureSpec, mDefaultHeight);
 
-        dayWidth = mWidth / COL_COUNT;
-        dayHeight = mHeight / realRowCount;
-//        Log.d(TAG, SCMonth.getYear()+"-"+SCMonth.getMonth()+" onMeasure");
-//        Log.d(TAG, "mWidth:"+mWidth+" mHeight:"+mHeight+" dayWidth:"+dayWidth+" dayHeight:"+dayHeight);
-        setMeasuredDimension(mWidth, mHeight);
+        dayWidth = width / COL_COUNT;
+        dayHeight = height / realRowCount;
+//        Log.d(TAG, "mWidth:"+width+" mHeight:"+height+" dayWidth:"+dayWidth+" dayHeight:"+dayHeight);
+        setMeasuredDimension(width, height);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+
+//        int decorSize = horizontalDecors.size() + verticalDecors.size();
+
+        for (int index = 0, count = getChildCount();
+             index < count; index++){
+            View childView = getChildAt(index);
+            int row = index / COL_COUNT;
+            int col = index - row * COL_COUNT;
+            int l = col * dayWidth;
+            int t = row * dayHeight;
+            int r = l + dayWidth;
+            int b = t + dayHeight;
+            childView.layout(l, t,
+                    r, b);
+        }
+
+        for (int row = 0, hCount = horizontalDecors.size(); row < hCount; row++){
+            DayViewInflater.Decor decor = horizontalDecors.get(row);
+            if(decor.isShowDecor()){
+                View decorView = decor.getDecorView();
+                if(row == hCount-1){
+                    decorView.layout(0, row * dayHeight - decorView.getMeasuredHeight(), getWidth(), row * dayHeight);
+                }else{
+                    decorView.layout(0, row * dayHeight, getWidth(), row * dayHeight+decorView.getMeasuredHeight());
+                }
+
+            }
+        }
+
+        for (int col = 0, vCount = verticalDecors.size(); col < vCount; col++){
+            DayViewInflater.Decor decor = verticalDecors.get(col);
+            if(decor.isShowDecor()){
+                View decorView = decor.getDecorView();
+                if(col == vCount - 1){
+                    decorView.layout(col * dayWidth - decorView.getMeasuredWidth(), 0, col * dayWidth, getHeight());
+                }else{
+                    decorView.layout(col * dayWidth, 0, col * dayWidth + decorView.getMeasuredWidth(), getHeight());
+                }
+            }
+        }
     }
 
     private int getMeasurement(int measureSpec, int contentSize) {
-        int specMode = View.MeasureSpec.getMode(measureSpec);
-        int specSize = View.MeasureSpec.getSize(measureSpec);
+        int specMode = MeasureSpec.getMode(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
         int resultSize = 0;
         switch (specMode){
             case MeasureSpec.EXACTLY:
@@ -273,70 +400,50 @@ public class MonthView extends View{
     }
 
     private void initEditorMode(String testMonth, String selectedDays){
-        SCMonth SCMonth;
+        SCMonth scMonth;
         if(!TextUtils.isEmpty(testMonth)){
             String[] ym = testMonth.split("-");
             int year = Integer.parseInt(ym[0]);
             int month = Integer.parseInt(ym[1]);
-            SCMonth = new SCMonth(year, month);
+            scMonth = new SCMonth(year, month);
         }else{
-            SCMonth = new SCMonth(SCDateUtils.getCurrentYear(), SCDateUtils.getCurrentMonth());
+            scMonth = new SCMonth(SCDateUtils.getCurrentYear(), SCDateUtils.getCurrentMonth());
         }
         if(!TextUtils.isEmpty(selectedDays)){
             String[] days = selectedDays.split(",");
             for (String day:days){
-                SCMonth.addSelectedDay(new FullDay(SCMonth.getYear(), SCMonth.getMonth(), Integer.parseInt(day)));
+                scMonth.addSelectedDay(new FullDay(scMonth.getYear(), scMonth.getMonth(), Integer.parseInt(day)));
             }
         }
-        setSCMonth(SCMonth);
+        setSCMonth(scMonth);
     }
 
-    public int getNormalDayColor() {
-        return normalDayColor;
+    public void refresh() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                selectedDaysChanged();
+            }
+        });
     }
 
-    public int getPrevMonthDayColor() {
-        return prevMonthDayColor;
+    /**
+     * @return the first day of month is which week's day
+     */
+    public int getFirstdayOfWeekPosInMonth() {
+        return firstdayOfWeekPosInMonth;
     }
 
-    public int getNextMonthDayColor() {
-        return nextMonthDayColor;
+    /**
+     * @return the first day of week (support sunday,monday,saturday)
+     */
+    @SCMonth.WeekType
+    public int getFirstDayOfWeek() {
+        return firstDayOfWeek;
     }
 
-    public int getTodayColor() {
-        return todayColor;
-    }
-
-    public int getDaySize() {
-        return daySize;
-    }
-
-    public int getSelectedDayColor() {
-        return selectedDayColor;
-    }
-
-    public int getSelectedDayCircleColor() {
-        return selectedDayCircleColor;
-    }
-
-    public boolean isDrawMonthDay() {
-        return drawMonthDay;
-    }
-
-    public List<List<FullDay>> getMonthDays() {
-        return monthDays;
-    }
-
-    public int getDayWidth() {
-        return dayWidth;
-    }
-
-    public int getDayHeight() {
-        return dayHeight;
-    }
-
-    public void addSelectedDay(FullDay selectedDay){
-        getSCMonth().addSelectedDay(selectedDay);
+    public void setFirstDayOfWeek(@SCMonth.WeekType int firstDayOfWeek) {
+        this.firstDayOfWeek = firstDayOfWeek;
     }
 
     public interface OnMonthDayClickListener{

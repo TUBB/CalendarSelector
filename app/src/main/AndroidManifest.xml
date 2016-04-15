@@ -8,6 +8,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:name=".TestApplication"
         >
         <activity
             android:name=".MainActivity"
@@ -19,12 +20,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".NormalActivity"/>
-        <activity android:name=".SingleMonthSelectorActivity"/>
-        <activity android:name=".CalendarSelectorActivity"/>
-        <activity android:name=".CustomDrawerActivity"/>
-        <activity android:name=".StateSavedActivity"/>
-        <activity android:name=".ViewPagerActivity"/>
+        <activity android:name=".custom.DecorDayViewActivity"/>
+        <activity android:name=".custom.AnimCalendarSelectorActivity"/>
+        <activity android:name=".custom.AnimDayViewActivity"/>
+        <activity android:name=".custom.CustomDayViewActivity"/>
+        <activity android:name=".custom.CustomMainActivity"/>
+        <activity android:name=".normal.NormalMainActivity"/>
+        <activity android:name=".normal.NormalActivity"/>
+        <activity android:name=".normal.SingleMonthSelectorActivity"/>
+        <activity android:name=".normal.CalendarSelectorActivity"/>
+        <activity android:name=".normal.StateSavedActivity"/>
+        <activity android:name=".normal.ViewPagerActivity"/>
     </application>
 
 </manifest>

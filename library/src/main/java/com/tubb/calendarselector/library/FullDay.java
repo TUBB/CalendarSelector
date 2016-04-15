@@ -8,6 +8,14 @@ import android.os.Parcelable;
  */
 public class FullDay implements Parcelable {
 
+    public static final int WEEK_1 = 1;
+    public static final int WEEK_2 = 2;
+    public static final int WEEK_3 = 3;
+    public static final int WEEK_4 = 4;
+    public static final int WEEK_5 = 5;
+    public static final int WEEK_6 = 6;
+    public static final int WEEK_7 = 7;
+
     protected int year;
     protected int month;
     protected int day;
@@ -17,6 +25,8 @@ public class FullDay implements Parcelable {
         this.month = month;
         this.day = day;
     }
+
+    public @interface WeekOf{}
 
     public int getYear() {
         return year;

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:gravity="center"
+    >
+
+    <Button
+        android:id="@+id/bt_normal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Custom Day View"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_decor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Decor Day View"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_anim"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Select Anim"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_anim_calendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Calendar Anim"
+        android:onClick="viewClick"/>
+
+</LinearLayout>

@@ -2,4 +2,5 @@
 <resources>
     <dimen name="t_16">16sp</dimen>
     <dimen name="s_30">30dp</dimen>
+    <dimen name="s_15">15dp</dimen>
 </resources>

@@ -2,7 +2,10 @@ package com.tubb.calendarselector.library;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.IntDef;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -13,6 +16,7 @@ public class SCMonth implements Parcelable {
     public static final int SUNDAY_OF_WEEK = 1;
     public static final int MONDAY_OF_WEEK = 2;
     public static final int SATURDAY_OF_WEEK = 7;
+
     protected int year;
     protected int month;
     protected List<FullDay> selectedDays = new ArrayList<>(5);
@@ -21,6 +25,10 @@ public class SCMonth implements Parcelable {
         this.year = year;
         this.month = month;
     }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SUNDAY_OF_WEEK, MONDAY_OF_WEEK, SATURDAY_OF_WEEK})
+    public @interface WeekType{}
 
     public void setMonth(int month) {
         this.month = month;
@@ -42,7 +50,7 @@ public class SCMonth implements Parcelable {
         this.selectedDays = selectedDays;
     }
 
-    public List<FullDay> getSelectedDays() {
+    protected List<FullDay> getSelectedDays() {
         return selectedDays;
     }
 

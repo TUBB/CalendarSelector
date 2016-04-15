@@ -51,7 +51,7 @@ public class CalendarSelector extends SingleMonthSelector {
 
         @Override
         public void onMonthDayClick(FullDay day) {
-            if(!SCDateUtils.isMonthDay(monthView.getSCMonth().getYear(), monthView.getSCMonth().getMonth(),
+            if(!SCDateUtils.isMonthDay(monthView.getYear(), monthView.getMonth(),
                     day.getYear(), day.getMonth()))
                 return;
             switch (mode){
@@ -75,8 +75,7 @@ public class CalendarSelector extends SingleMonthSelector {
         if(!startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){ // init status
             startSelectedRecord.position = position;
             startSelectedRecord.day = ssDay;
-            monthView.getSCMonth().addSelectedDay(ssDay);
-            monthView.invalidate();
+            monthView.addSelectedDay(ssDay);
         }else if(startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){ // start day is ok, but end day not
             if(startSelectedRecord.position < position){ // click later month
                 if(segmentSelectListener.onInterceptSelect(startSelectedRecord.day, ssDay)) return;
@@ -91,19 +90,18 @@ public class CalendarSelector extends SingleMonthSelector {
                 startSelectedRecord.day = ssDay;
                 segmentMonthSelected(container);
             }else{ // click the same month
-                SCMonth SCMonth = monthView.getSCMonth();
                 if(startSelectedRecord.day.getDay() != ssDay.getDay()){
                     if(startSelectedRecord.day.getDay() < ssDay.getDay()){
                         if(segmentSelectListener.onInterceptSelect(startSelectedRecord.day, ssDay)) return;
                         for (int day = startSelectedRecord.day.getDay(); day <= ssDay.getDay(); day++){
-                            SCMonth.addSelectedDay(new FullDay(SCMonth.getYear(), SCMonth.getMonth(), day));
+                            monthView.addSelectedDay(new FullDay(monthView.getYear(), monthView.getMonth(), day));
                         }
                         endSelectedRecord.position = position;
                         endSelectedRecord.day = ssDay;
                     }else if(startSelectedRecord.day.getDay() > ssDay.getDay()){
                         if(segmentSelectListener.onInterceptSelect(ssDay, startSelectedRecord.day)) return;
                         for (int day = ssDay.getDay(); day <= startSelectedRecord.day.getDay(); day++){
-                            SCMonth.addSelectedDay(new FullDay(SCMonth.getYear(), SCMonth.getMonth(), day));
+                            monthView.addSelectedDay(new FullDay(monthView.getYear(), monthView.getMonth(), day));
                         }
                         endSelectedRecord.position = position;
                         endSelectedRecord.day = startSelectedRecord.day;
@@ -114,8 +112,7 @@ public class CalendarSelector extends SingleMonthSelector {
                 }else{
                     // selected the same day when the end day is not selected
                     segmentSelectListener.selectedSameDay(ssDay);
-                    SCMonth.getSelectedDays().clear();
-                    monthView.invalidate();
+                    monthView.clearSelectedDays();
                     startSelectedRecord.reset();
                     endSelectedRecord.reset();
                 }
@@ -164,10 +161,14 @@ public class CalendarSelector extends SingleMonthSelector {
                 while (!unvisited.isEmpty()) {
                     View child = unvisited.remove(0);
                     if (!(child instanceof ViewGroup)) {
-                        if(child instanceof MonthView) child.invalidate();
                         continue;
                     }
                     ViewGroup group = (ViewGroup) child;
+                    if(group instanceof MonthView){
+                        MonthView monthView = (MonthView) group;
+                        monthView.refresh();
+                        break;
+                    }
                     final int childCount = group.getChildCount();
                     for (int i=0; i<childCount; i++) unvisited.add(group.getChildAt(i));
                 }

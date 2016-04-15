@@ -26,7 +26,8 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         sc:sc_firstday_week="sunday"
-        sc:sc_draw_monthday="false"
-        sc:sc_month="2016-3"/>
+        sc:sc_draw_monthday_only="false"
+        sc:sc_month="2016-1"
+        sc:sc_selected_days="2,3,16,17,18,19,29"/>
 
 </LinearLayout>

@@ -23,8 +23,6 @@
         android:id="@+id/ssMv"
         android:layout_width="wrap_content"
         android:layout_height="250dp"
-        sc:sc_draw_monthday="true"
-        sc:sc_day_textsize="@dimen/t_16"
         sc:sc_firstday_week="sunday"
         sc:sc_month="2016-1"
         sc:sc_selected_days="11,15,28"

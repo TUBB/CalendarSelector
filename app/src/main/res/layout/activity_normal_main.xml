@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:gravity="center"
+    >
+
+    <Button
+        android:id="@+id/bt_normal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Normal"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_single"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Single Month Selector"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_calendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Calendar Selector"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_savedstate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="State Saved"
+        android:onClick="viewClick"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/bt_vp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="VIEWPAGER"
+        android:onClick="viewClick"/>
+
+    <Button
+        android:id="@+id/bt_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="State Saved"
+        android:onClick="viewClick"/>
+</LinearLayout>

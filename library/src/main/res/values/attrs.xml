@@ -2,21 +2,7 @@
 <resources>
     <declare-styleable name="MonthView">
         <!-- only draw the month day, or not, default is false -->
-        <attr name="sc_draw_monthday" format="boolean"/>
-        <!-- the monday day text color -->
-        <attr name="sc_normalday_color" format="color"/>
-        <!-- last month day text color -->
-        <attr name="sc_prevmonthday_color" format="color"/>
-        <!-- today text color -->
-        <attr name="sc_today_color" format="color"/>
-        <!-- next month day text color -->
-        <attr name="sc_nextmonthday_color" format="color"/>
-        <!-- selected day text color -->
-        <attr name="sc_selectedday_color" format="color"/>
-        <!-- selected day background color -->
-        <attr name="sc_selectedday_bgcolor" format="color"/>
-        <!-- the day text size -->
-        <attr name="sc_day_textsize" format="dimension"/>
+        <attr name="sc_draw_monthday_only" format="boolean"/>
         <!-- start day of a week, we support (sunday、monday and saturday) -->
         <attr name="sc_firstday_week" format="enum">
             <enum name="sunday" value="1"/>

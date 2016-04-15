@@ -8,10 +8,10 @@ Supported functionality:
  * select `continuous` or `discontinuous` dates
  * single month or multi months selection
  * intercept select event
- * state saved
+ * save state
  * UI custom
  * indicate the start day of a week (`SUNDAY`、`SATURDAY`、`MONDAY`)
- * editor mode support, a good feeling of developing
+ * editor mode support, a good feeling of develop
  * API 8+
  
 Preview
@@ -36,7 +36,7 @@ Just use [MonthView][1], [MonthView][1] is a custom view for display month's day
     android:layout_width="match_parent"
     android:layout_height="300dp"
     sc:sc_firstday_week="sunday"
-    sc:sc_draw_monthday="false"
+    sc:sc_draw_monthday_only="false"
     sc:sc_month="2016-3"/>
 ```
 
@@ -44,6 +44,7 @@ Just use [MonthView][1], [MonthView][1] is a custom view for display month's day
 
 We provide two `calendar selector` to select dates, one ( [SingleMonthSelector][2] ) is used for single month, 
 another ( [CalendarSelector][3] ) is used for multi months
+And the two `calendar selector` support `save state`, [StateSavedActivity][6] shows how to use them
 
 [SingleMonthSelector][2] usage
 
@@ -51,15 +52,17 @@ another ( [CalendarSelector][3] ) is used for multi months
 singleMonthSelector.bind(monthView);
 ```
 
-[CalendarSelector][3] usage ( support all `ViewGroup`'s subclasses, except `ListView` )
+[CalendarSelector][3] usage ( support all `ViewGroup`'s subclasses, but except `ListView` )
 
 ```java
 calendarSelector.bind(containerViewGroup, monthView, itemPosition);
 ```
 
-We support intercept select event, so you do something you like, such as define the limit dates
+We support intercept select event, so you can do something you like, such as define the limit select dates
 
-segment mode
+We include two select mode, one is for `continuous` dates (`SEGMENT` MODE), another is for `discontinuous` dates (`INTERVAL` MODE)
+
+SEGMENT mode
 
 ```java
 selector = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
@@ -97,7 +100,7 @@ selector.setSegmentSelectListener(new SegmentSelectListener() {
 });
 ```
 
-interval mode
+INTERVAL mode
 
 ```java
 selector = new SingleMonthSelector(CalendarSelector.Mode.INTERVAL);
@@ -118,46 +121,148 @@ selector.setIntervalSelectListener(new IntervalSelectListener() {
 });
 ```
 
-[SingleMonthSelector][2] and [CalendarSelector][3] support two selector mode ( `SEGMENT` and `INTERVAL` ) and state saved, restore selector state
+More details please see [SingleMonthSelectorActivity][4] and [CalendarSelectorActivity][5]
 
-More usage detail please see [SingleMonthSelectorActivity][4] and [CalendarSelectorActivity][5]
+Custom
+======
 
-We provide month's day drawer [DayDrawer][6] to custom month view display, we implements a default drawer [DefaultDayDrawer][8], you can extend it for you, please look at [CustomDrawerActivity][7]
-
-We include so many attrs for [MonthView][1], just like indicate the start day of a week...
+`CalendarSelector` easy to custom, we abstract out the month's day ui to custom, 
+so you can control the ui of month's day, just like a view, layout in xml
 
 ```xml
-<declare-styleable name="MonthView">
-    <!-- only draw the month day, or not, default is false -->
-    <attr name="sc_draw_monthday" format="boolean"/>
-    <!-- the monday day text color -->
-    <attr name="sc_normalday_color" format="color"/>
-    <!-- last month day text color -->
-    <attr name="sc_prevmonthday_color" format="color"/>
-    <!-- today text color -->
-    <attr name="sc_today_color" format="color"/>
-    <!-- next month day text color -->
-    <attr name="sc_nextmonthday_color" format="color"/>
-    <!-- selected day text color -->
-    <attr name="sc_selectedday_color" format="color"/>
-    <!-- selected day background color -->
-    <attr name="sc_selectedday_bgcolor" format="color"/>
-    <!-- the day text size -->
-    <attr name="sc_day_textsize" format="dimension"/>
-    <!-- start day of a week, we support (sunday、monday and saturday) -->
-    <attr name="sc_firstday_week" format="enum">
-        <enum name="sunday" value="1"/>
-        <enum name="monday" value="2"/>
-        <enum name="saturday" value="7"/>
-    </attr>
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- editor mode only -->
-    <!-- test selected days (format:1,2,3,4) -->
-    <attr name="sc_selected_days" format="string"/>
-    <!-- test month (format:2016-3) -->
-    <attr name="sc_month" format="string"/>
-</declare-styleable>
+    <TextView
+        android:id="@+id/tvDay"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:textSize="@dimen/t_16"
+        tools:text="0"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="@color/color_dayview_text_selector"
+        android:background="@drawable/drawable_custom_dayview_text_bg"
+        />
+
+</FrameLayout>
 ```
+
+then implement your `DayViewInflater`, used by MonthView (`MonthView.setSCMonth(scMonth, new CustomDayViewInflater(context))`)
+
+```java
+public class CustomDayViewInflater extends DayViewInflater{
+
+    public CustomDayViewInflater(Context context) {
+        super(context);
+    }
+
+    @Override
+    public DayViewHolder inflateDayView(ViewGroup container) {
+        View dayView = mLayoutInflater.inflate(R.layout.layout_dayview_custom, container, false);
+        return new CustomDayViewHolder(dayView);
+    }
+
+    public static class CustomDayViewHolder extends DayViewHolder{
+
+        protected TextView tvDay;
+        private int mPrevMonthDayTextColor;
+        private int mNextMonthDayTextColor;
+
+        public CustomDayViewHolder(View dayView) {
+            super(dayView);
+            tvDay = (TextView) dayView.findViewById(com.tubb.calendarselector.library.R.id.tvDay);
+            mPrevMonthDayTextColor = ContextCompat.getColor(mContext, com.tubb.calendarselector.library.R.color.c_999999);
+            mNextMonthDayTextColor = ContextCompat.getColor(mContext, com.tubb.calendarselector.library.R.color.c_999999);
+        }
+
+        @Override
+        public void setCurrentMonthDayText(FullDay day, boolean isSelected) {
+            tvDay.setText(String.valueOf(day.getDay()));
+            tvDay.setSelected(isSelected);
+        }
+
+        @Override
+        public void setPrevMonthDayText(FullDay day) {
+            tvDay.setTextColor(mPrevMonthDayTextColor);
+            tvDay.setText(String.valueOf(day.getDay()));
+        }
+
+        @Override
+        public void setNextMonthDayText(FullDay day) {
+            tvDay.setTextColor(mNextMonthDayTextColor);
+            tvDay.setText(String.valueOf(day.getDay()));
+        }
+
+    }
+}
+```
+
+When day has selected, the DayViewHolder.setCurrentMonthDayText(FullDay day, boolean isSelected) method will be excute
+At this, you can something interesting, like add animator for day view, please see [AnimDayViewInflater][8]
+
+```java
+@Override
+public void setCurrentMonthDayText(FullDay day, boolean isSelected) {
+    boolean oldSelected = tvDay.isSelected();
+    tvDay.setText(String.valueOf(day.getDay()));
+    tvDay.setSelected(isSelected);
+    // view selected animation
+    if(!oldSelected && isSelected){
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.setInterpolator(AnimationUtils.loadInterpolator(mContext, android.R.anim.bounce_interpolator));
+        animatorSet.play(ObjectAnimator.ofFloat(tvDay, "scaleX", 0.5f, 1.0f))
+                .with(ObjectAnimator.ofFloat(tvDay, "scaleY", 0.5f, 1.0f));
+        animatorSet.setDuration(500)
+                .start();
+    }
+}
+```
+
+We also provide the ability for decorate day view, please see [DecorDayViewInflater][7]
+```java
+@Override
+public Decor inflateHorizontalDecor(ViewGroup container, int row, int totalRow) {
+    return new Decor(mLayoutInflater.inflate(R.layout.view_horizontal_decor, container, false), true);
+}
+
+@Override
+public Decor inflateVerticalDecor(ViewGroup container, int col, int totalCol) {
+    return new Decor(mLayoutInflater.inflate(R.layout.view_vertical_decor, container, false), true);
+}
+```
+
+We include several attrs for [MonthView][1]
+
+```xml
+<resources>
+    <declare-styleable name="MonthView">
+        <!-- only draw the month day, or not, default is false -->
+        <attr name="sc_draw_monthday_only" format="boolean"/>
+        <!-- start day of a week, we support (sunday、monday and saturday) -->
+        <attr name="sc_firstday_week" format="enum">
+            <enum name="sunday" value="1"/>
+            <enum name="monday" value="2"/>
+            <enum name="saturday" value="7"/>
+        </attr>
+
+        <!-- editor mode only -->
+        <!-- test selected days (format:1,2,3,4) -->
+        <attr name="sc_selected_days" format="string"/>
+        <!-- test month (format:2016-3) -->
+        <attr name="sc_month" format="string"/>
+    </declare-styleable>
+</resources>
+```
+
+Note
+====
+
+If you have any question, it will be great if you commit some issues
+
 
 License
 -------
@@ -183,6 +288,4 @@ License
  [3]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/CalendarSelector.java
  [4]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/SingleMonthSelectorActivity.java
  [5]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/CalendarSelectorActivity.java
- [6]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/DayDrawer.java
- [7]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/CustomDrawerActivity.java
- [8]: https://github.com/TUBB/CalendarSelector/blob/master/library/src/main/java/com/tubb/calendarselector/library/DefaultDayDrawer.java
+ [6]: 

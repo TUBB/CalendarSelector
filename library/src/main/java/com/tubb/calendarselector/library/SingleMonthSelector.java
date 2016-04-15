@@ -32,7 +32,7 @@ public class SingleMonthSelector implements Parcelable {
         monthView.setMonthDayClickListener(new MonthView.OnMonthDayClickListener() {
             @Override
             public void onMonthDayClick(FullDay day) {
-                if(!SCDateUtils.isMonthDay(monthView.getSCMonth().getYear(), monthView.getSCMonth().getMonth(),
+                if(!SCDateUtils.isMonthDay(monthView.getYear(), monthView.getMonth(),
                         day.getYear(), day.getMonth()))
                     return;
                 switch (mode){
@@ -52,60 +52,52 @@ public class SingleMonthSelector implements Parcelable {
 
         if(startSelectedRecord.day == null && endSelectedRecord.day == null){ // init status
             startSelectedRecord.day = ssDay;
-            monthView.getSCMonth().addSelectedDay(ssDay);
-            monthView.invalidate();
+            monthView.addSelectedDay(ssDay);
         }else if(endSelectedRecord.day == null){ // start day is ok, but end day not
 
-            SCMonth SCMonth = monthView.getSCMonth();
             if(startSelectedRecord.day.getDay() != ssDay.getDay()){
                 if(startSelectedRecord.day.getDay() < ssDay.getDay()){
                     if(segmentSelectListener.onInterceptSelect(startSelectedRecord.day, ssDay)) return;
                     for (int day = startSelectedRecord.day.getDay(); day <= ssDay.getDay(); day++){
-                        SCMonth.addSelectedDay(new FullDay(SCMonth.getYear(), SCMonth.getMonth(), day));
+                        monthView.addSelectedDay(new FullDay(monthView.getYear(), monthView.getMonth(), day));
                     }
                     endSelectedRecord.day = ssDay;
                 }else if(startSelectedRecord.day.getDay() > ssDay.getDay()){
                     if(segmentSelectListener.onInterceptSelect(ssDay, startSelectedRecord.day)) return;
                     for (int day = ssDay.getDay(); day <= startSelectedRecord.day.getDay(); day++){
-                        SCMonth.addSelectedDay(new FullDay(SCMonth.getYear(), SCMonth.getMonth(), day));
+                        monthView.addSelectedDay(new FullDay(monthView.getYear(), monthView.getMonth(), day));
                     }
                     endSelectedRecord.day = startSelectedRecord.day;
                     startSelectedRecord.day = ssDay;
                 }
-                monthView.invalidate();
                 segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
             }else{
                 // selected the same day when the end day is not selected
                 segmentSelectListener.selectedSameDay(ssDay);
-                SCMonth.getSelectedDays().clear();
-                monthView.invalidate();
+                monthView.clearSelectedDays();
                 startSelectedRecord.reset();
                 endSelectedRecord.reset();
             }
 
         }else { // start day and end day is ok
-            monthView.getSCMonth().getSelectedDays().clear();
-            monthView.getSCMonth().getSelectedDays().add(ssDay);
-            monthView.invalidate();
+            monthView.clearSelectedDays();
+            monthView.addSelectedDay(ssDay);
             startSelectedRecord.day = ssDay;
             endSelectedRecord.reset();
         }
     }
 
-
     protected void intervalSelect(MonthView monthView, FullDay day) {
-        List<FullDay> selectedDays = monthView.getSCMonth().getSelectedDays();
-        if(selectedDays.contains(day)) {
-            selectedDays.remove(day);
+        if(monthView.getSelectedDays().contains(day)) {
+            monthView.removeSelectedDay(day);
             sDays.remove(day);
             if(intervalSelectListener.onInterceptSelect(sDays, day)) return;
         } else {
             if(intervalSelectListener.onInterceptSelect(sDays, day)) return;
-            selectedDays.add(day);
+            monthView.addSelectedDay(day);
             sDays.add(day);
         }
         intervalSelectListener.onIntervalSelect(sDays);
-        monthView.invalidate();
     }
 
     public void setIntervalSelectListener(IntervalSelectListener intervalSelectListener) {

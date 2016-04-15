@@ -5,6 +5,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.tubb.calendarselector.custom.CustomMainActivity;
+import com.tubb.calendarselector.normal.CalendarSelectorActivity;
+import com.tubb.calendarselector.normal.NormalActivity;
+import com.tubb.calendarselector.normal.NormalMainActivity;
+import com.tubb.calendarselector.normal.SingleMonthSelectorActivity;
+import com.tubb.calendarselector.normal.StateSavedActivity;
+import com.tubb.calendarselector.normal.ViewPagerActivity;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "mv";
@@ -17,23 +25,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void viewClick(View view){
         switch (view.getId()){
-            case R.id.bt_normal:
-                startActivity(new Intent(this, NormalActivity.class));
-                break;
-            case R.id.bt_single:
-                startActivity(new Intent(this, SingleMonthSelectorActivity.class));
-                break;
-            case R.id.bt_calendar:
-                startActivity(new Intent(this, CalendarSelectorActivity.class));
+            case R.id.bt_default:
+                startActivity(new Intent(this, NormalMainActivity.class));
                 break;
             case R.id.bt_custom:
-                startActivity(new Intent(this, CustomDrawerActivity.class));
-                break;
-            case R.id.bt_savedstate:
-                startActivity(new Intent(this, StateSavedActivity.class));
-                break;
-            case R.id.bt_vp:
-                startActivity(new Intent(this, ViewPagerActivity.class));
+                startActivity(new Intent(this, CustomMainActivity.class));
                 break;
         }
     }
