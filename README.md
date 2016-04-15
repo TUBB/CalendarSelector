@@ -262,7 +262,6 @@ Note
 ====
 
 If you have any question, just commit some issues
-Thanks!
 
 
 License
