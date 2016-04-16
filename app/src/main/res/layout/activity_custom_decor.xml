@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_margin="5dp"
-        sc:sc_draw_monthday_only="false"
+        sc:sc_draw_monthday_only="true"
         sc:sc_month="2016-2"
         />
 

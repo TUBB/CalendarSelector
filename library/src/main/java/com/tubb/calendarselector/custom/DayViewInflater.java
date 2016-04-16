@@ -21,6 +21,11 @@ public abstract class DayViewInflater {
         mLayoutInflater = LayoutInflater.from(mContext);
     }
 
+    /**
+     * inflate day view
+     * @param container MonthView
+     * @return day view
+     */
     public abstract DayViewHolder inflateDayView(ViewGroup container);
 
     public Decor inflateHorizontalDecor(ViewGroup container, int row, int totalRow){

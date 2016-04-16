@@ -67,9 +67,6 @@ public class CalendarSelector extends SingleMonthSelector {
 
     private void segmentSelect(ViewGroup container, MonthView monthView, FullDay ssDay, int position) {
 
-//        Log.d(TAG, startSelectedRecord != null?startSelectedRecord.toString():"startSelectedRecord is null");
-//        Log.d(TAG, endSelectedRecord != null?endSelectedRecord.toString():"endSelectedRecord is null");
-
         if(segmentSelectListener.onInterceptSelect(ssDay)) return;
 
         if(!startSelectedRecord.isRecord() && !endSelectedRecord.isRecord()){ // init status

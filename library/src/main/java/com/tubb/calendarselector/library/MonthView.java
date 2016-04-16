@@ -15,7 +15,6 @@ import android.widget.FrameLayout;
 import com.tubb.calendarselector.custom.DayViewHolder;
 import com.tubb.calendarselector.custom.DayViewInflater;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -190,41 +189,59 @@ public class MonthView extends FrameLayout{
         int dayCountOfPrevMonth = SCDateUtils.getDayCountOfMonth(prevMonth.getYear(), prevMonth.getMonth());
         nextMonth = SCDateUtils.nextMonth(scMonth.getYear(), scMonth.getMonth());
         firstdayOfWeekPosInMonth = SCDateUtils.mapDayOfWeekInMonth(SCDateUtils.getDayOfWeekInMonth(scMonth.getYear(), scMonth.getMonth()), firstDayOfWeek);
-//        Log.e(TAG, "firstdayOfWeekPosInMonth:"+firstdayOfWeekPosInMonth);
         int dayCountOfMonth = SCDateUtils.getDayCountOfMonth(scMonth.getYear(), scMonth.getMonth());
 
-        int realRow = 0;
+        int currentRealRowCount = 0;
         int day = 1;
         for (int row = 0; row < ROW_COUNT; row++){
             boolean isAllRowEmpty = true;
             for (int col = 1; col <= COL_COUNT; col++){
                 int monthPosition = col + row * COL_COUNT;
+                FullDay oldFullDay = monthDays[row][col-1];
                 if(monthPosition >= firstdayOfWeekPosInMonth
                         && monthPosition < firstdayOfWeekPosInMonth + dayCountOfMonth){ // current month
-                    FullDay currentMonthDay = new FullDay(scMonth.getYear(), scMonth.getMonth(), day);
-                    monthDays[row][col-1] = currentMonthDay;
+                    if(oldFullDay == null){
+                        FullDay currentMonthDay = new FullDay(scMonth.getYear(), scMonth.getMonth(), day);
+                        monthDays[row][col-1] = currentMonthDay;
+                    }else{
+                        oldFullDay.setYear(scMonth.getYear());
+                        oldFullDay.setMonth(scMonth.getMonth());
+                        oldFullDay.setDay(day);
+                    }
                     day++;
                     isAllRowEmpty = false;
                 }else if(monthPosition < firstdayOfWeekPosInMonth){ // prev month
                     int prevDay = dayCountOfPrevMonth - (firstdayOfWeekPosInMonth - 1 - monthPosition);
-                    FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
-                    monthDays[row][col-1] = prevMonthDay;
+                    if(oldFullDay == null){
+                        FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
+                        monthDays[row][col-1] = prevMonthDay;
+                    }else{
+                        oldFullDay.setYear(prevMonth.getYear());
+                        oldFullDay.setMonth(prevMonth.getMonth());
+                        oldFullDay.setDay(prevDay);
+                    }
                 }else if(monthPosition >= firstdayOfWeekPosInMonth + dayCountOfMonth){ // next month
-                    FullDay nextMonthDay = new FullDay(nextMonth.getYear(), nextMonth.getMonth(),
-                            monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
-                    monthDays[row][col-1] = nextMonthDay;
+                    if(oldFullDay == null){
+                        FullDay nextMonthDay = new FullDay(nextMonth.getYear(), nextMonth.getMonth(),
+                                monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
+                        monthDays[row][col-1] = nextMonthDay;
+                    }else{
+                        oldFullDay.setYear(nextMonth.getYear());
+                        oldFullDay.setMonth(nextMonth.getMonth());
+                        oldFullDay.setDay(monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
+                    }
                 }
             }
-            if(!isAllRowEmpty) realRow++;
+            if(!isAllRowEmpty) currentRealRowCount++;
         }
 
         if(drawMonthDay) {
-            if(realRowCount != realRow) neededRelayout = true;
-            realRowCount = realRow;
+            if(realRowCount != currentRealRowCount) neededRelayout = true;
+            realRowCount = currentRealRowCount;
         } else{
             // adjust display
             if(firstdayOfWeekPosInMonth == 1
-                    && (realRow == (ROW_COUNT - 1) || realRow == (ROW_COUNT - 2))
+                    && (currentRealRowCount == (ROW_COUNT - 1) || currentRealRowCount == (ROW_COUNT - 2))
                     && isFirstRowFullCurrentMonthDays()){
                 FullDay[][] tempMonthdays = new FullDay[ROW_COUNT][COL_COUNT];
                 FullDay[] ssDays = new FullDay[COL_COUNT];
@@ -330,13 +347,10 @@ public class MonthView extends FrameLayout{
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
         int width = getMeasurement(widthMeasureSpec, mDefaultWidth);
         int height = getMeasurement(heightMeasureSpec, mDefaultHeight);
-
         dayWidth = width / COL_COUNT;
         dayHeight = height / realRowCount;
-//        Log.d(TAG, "mWidth:"+width+" mHeight:"+height+" dayWidth:"+dayWidth+" dayHeight:"+dayHeight);
         setMeasuredDimension(width, height);
     }
 
@@ -356,7 +370,7 @@ public class MonthView extends FrameLayout{
                     r, b);
         }
 
-        for (int row = 0, hCount = ROW_COUNT + 1; row < hCount; row++){
+        for (int row = 0, hCount = realRowCount + 1; row < hCount; row++){
             DayViewInflater.Decor hDecor = horizontalDecors.get(row);
             if(hDecor != null && hDecor.isShowDecor()){
                 View decorView = hDecor.getDecorView();
@@ -373,6 +387,7 @@ public class MonthView extends FrameLayout{
             if(vDecor != null && vDecor.isShowDecor()){
                 View decorView = vDecor.getDecorView();
                 if(col == vCount - 1){
+                    Log.e(TAG, "last col:"+col);
                     decorView.layout(col * dayWidth - decorView.getMeasuredWidth(), 0, col * dayWidth, getHeight());
                 }else{
                     decorView.layout(col * dayWidth, 0, col * dayWidth + decorView.getMeasuredWidth(), getHeight());

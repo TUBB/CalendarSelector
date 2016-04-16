@@ -49,6 +49,7 @@ public class AnimDayViewInflater extends DayViewInflater{
             boolean oldSelected = tvDay.isSelected();
             tvDay.setText(String.valueOf(day.getDay()));
             tvDay.setSelected(isSelected);
+            // selected animation
             if(!oldSelected && isSelected){
                 AnimatorSet animatorSet = new AnimatorSet();
                 animatorSet.setInterpolator(AnimationUtils.loadInterpolator(mContext, android.R.anim.bounce_interpolator));

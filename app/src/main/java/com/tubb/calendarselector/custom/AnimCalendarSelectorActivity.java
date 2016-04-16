@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -120,7 +121,7 @@ public class AnimCalendarSelectorActivity extends AppCompatActivity {
     class CalendarAdpater extends RecyclerView.Adapter<CalendarViewHolder>{
 
         List<SCMonth> months;
-        AnimDayViewInflater animDayViewInflater;
+        DayViewInflater animDayViewInflater;
 
         public CalendarAdpater(List<SCMonth> months){
             this.months = months;
@@ -179,7 +180,6 @@ public class AnimCalendarSelectorActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
