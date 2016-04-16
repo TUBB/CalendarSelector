@@ -43,8 +43,7 @@ Just use [MonthView][1], [MonthView][1] is a custom view for display month's day
 ![Month](https://github.com/TUBB/CalendarSelector/blob/master/art/1.png)
 
 We provide two `calendar selector` to select dates, one ( [SingleMonthSelector][2] ) is used for single month, 
-another ( [CalendarSelector][3] ) is used for multi months
-And the two `calendar selector` support `save state`, [StateSavedActivity][6] shows how to use them
+another ( [CalendarSelector][3] ) is used for multi months, and the two `calendar selector` support `save state`, [StateSavedActivity][6] shows how to use them
 
 [SingleMonthSelector][2] usage
 
@@ -201,8 +200,8 @@ public class CustomDayViewInflater extends DayViewInflater{
 }
 ```
 
-When day has selected, the DayViewHolder.setCurrentMonthDayText(FullDay day, boolean isSelected) method will be excute
-At this, you can something interesting, like add animator for day view, please see [AnimDayViewInflater][8]
+When day has selected, the DayViewHolder.setCurrentMonthDayText(FullDay day, boolean isSelected) method will be excute, 
+at this moment, you can do something interesting (add animator for day view), please see [AnimDayViewInflater][8]
 
 ```java
 @Override
