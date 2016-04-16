@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.tubb.calendarselector.library.FullDay;
+
 /**
  * Created by tubingbing on 16/4/13.
  */

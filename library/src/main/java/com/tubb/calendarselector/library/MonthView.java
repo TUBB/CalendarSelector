@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -37,10 +38,10 @@ public class MonthView extends FrameLayout{
     private OnMonthDayClickListener mMonthDayClickListener;
 
     private FullDay[][] monthDays = new FullDay[ROW_COUNT][COL_COUNT];
-    private DayViewHolder[][] monthDayViewHolders = new DayViewHolder[ROW_COUNT][COL_COUNT];
+    private DayViewHolder[][] dayViewHolders = new DayViewHolder[ROW_COUNT][COL_COUNT];
     private DayViewInflater dayInflater;
-    private List<DayViewInflater.Decor> horizontalDecors = new ArrayList<>(ROW_COUNT+1);
-    private List<DayViewInflater.Decor> verticalDecors = new ArrayList<>(COL_COUNT+1);
+    private SparseArray<DayViewInflater.Decor> horizontalDecors = new SparseArray<>(ROW_COUNT+1);
+    private SparseArray<DayViewInflater.Decor> verticalDecors = new SparseArray<>(COL_COUNT+1);
 
     private int mDefaultWidth;
     private int mDefaultHeight;
@@ -94,8 +95,8 @@ public class MonthView extends FrameLayout{
         if(getChildCount() > 0){
             refresh();
         }else{
-            // wait for measure finish
             if(!isInEditMode()){
+                // wait for measure finish
                 post(new Runnable() {
                     @Override
                     public void run() {
@@ -123,7 +124,7 @@ public class MonthView extends FrameLayout{
                         dayWidth,
                         dayHeight));
                 addView(dayView);
-                monthDayViewHolders[row][col] = dayViewHolder;
+                dayViewHolders[row][col] = dayViewHolder;
                 drawDays(row, col, dayView);
                 dayView.setClickable(true);
                 final int clickRow = row;
@@ -137,24 +138,26 @@ public class MonthView extends FrameLayout{
             }
         }
 
-        for (int row = 0; row < ROW_COUNT+1; row++){
-            DayViewInflater.Decor horizontalDecor = dayInflater.inflateHorizontalDecor(this, row, realRowCount + 1);
-            if(horizontalDecor == null) horizontalDecor = new DayViewInflater.Decor(new View(mContext));
-            horizontalDecors.add(horizontalDecor);
-            addView(horizontalDecor.getDecorView()==null?new View(mContext):horizontalDecor.getDecorView());
+        for (int row = 0, hCount = ROW_COUNT + 1; row < hCount; row++){
+            DayViewInflater.Decor horizontalDecor = dayInflater.inflateHorizontalDecor(this, row, hCount);
+            if(horizontalDecor != null && horizontalDecor.getDecorView() != null){
+                horizontalDecors.put(row, horizontalDecor);
+                addView(horizontalDecor.getDecorView());
+            }
         }
 
-        for (int col = 0; col < COL_COUNT+1; col++){
-            DayViewInflater.Decor verticalDecor = dayInflater.inflateVerticalDecor(this, col, COL_COUNT+1);
-            if(verticalDecor == null) verticalDecor = new DayViewInflater.Decor(new View(mContext));
-            verticalDecors.add(verticalDecor);
-            addView(verticalDecor.getDecorView()==null?new View(mContext):verticalDecor.getDecorView());
+        for (int col = 0, vCount = COL_COUNT + 1; col < vCount; col++){
+            DayViewInflater.Decor verticalDecor = dayInflater.inflateVerticalDecor(this, col, vCount);
+            if(verticalDecor != null && verticalDecor.getDecorView() != null){
+                verticalDecors.put(col, verticalDecor);
+                addView(verticalDecor.getDecorView());
+            }
         }
     }
 
     private void drawDays(final int row, final int col, View dayView) {
         FullDay fullDay = monthDays[row][col];
-        DayViewHolder dayViewHolder = monthDayViewHolders[row][col];
+        DayViewHolder dayViewHolder = dayViewHolders[row][col];
         boolean isPrevMonthDay = SCDateUtils.isPrevMonthDay(
                 scMonth.getYear(), scMonth.getMonth(),
                 fullDay.getYear(), fullDay.getMonth());
@@ -340,8 +343,6 @@ public class MonthView extends FrameLayout{
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 
-//        int decorSize = horizontalDecors.size() + verticalDecors.size();
-
         for (int index = 0, count = getChildCount();
              index < count; index++){
             View childView = getChildAt(index);
@@ -355,23 +356,22 @@ public class MonthView extends FrameLayout{
                     r, b);
         }
 
-        for (int row = 0, hCount = horizontalDecors.size(); row < hCount; row++){
-            DayViewInflater.Decor decor = horizontalDecors.get(row);
-            if(decor.isShowDecor()){
-                View decorView = decor.getDecorView();
+        for (int row = 0, hCount = ROW_COUNT + 1; row < hCount; row++){
+            DayViewInflater.Decor hDecor = horizontalDecors.get(row);
+            if(hDecor != null && hDecor.isShowDecor()){
+                View decorView = hDecor.getDecorView();
                 if(row == hCount-1){
                     decorView.layout(0, row * dayHeight - decorView.getMeasuredHeight(), getWidth(), row * dayHeight);
                 }else{
                     decorView.layout(0, row * dayHeight, getWidth(), row * dayHeight+decorView.getMeasuredHeight());
                 }
-
             }
         }
 
-        for (int col = 0, vCount = verticalDecors.size(); col < vCount; col++){
-            DayViewInflater.Decor decor = verticalDecors.get(col);
-            if(decor.isShowDecor()){
-                View decorView = decor.getDecorView();
+        for (int col = 0, vCount = COL_COUNT + 1; col < vCount; col++){
+            DayViewInflater.Decor vDecor = verticalDecors.get(col);
+            if(vDecor != null && vDecor.isShowDecor()){
+                View decorView = vDecor.getDecorView();
                 if(col == vCount - 1){
                     decorView.layout(col * dayWidth - decorView.getMeasuredWidth(), 0, col * dayWidth, getHeight());
                 }else{
@@ -379,6 +379,7 @@ public class MonthView extends FrameLayout{
                 }
             }
         }
+
     }
 
     private int getMeasurement(int measureSpec, int contentSize) {

@@ -3,6 +3,8 @@ package com.tubb.calendarselector.library;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.tubb.calendarselector.custom.DayViewHolder;
+
 /**
  * Created by tubingbing on 16/3/1.
  */
@@ -19,6 +21,8 @@ public class FullDay implements Parcelable {
     protected int year;
     protected int month;
     protected int day;
+
+    private DayViewHolder dayViewHolder;
 
     public FullDay(int year, int month, int day) {
         this.year = year;
@@ -50,6 +54,14 @@ public class FullDay implements Parcelable {
 
     public void setDay(int day) {
         this.day = day;
+    }
+
+    void setDayViewHolder(DayViewHolder dayViewHolder) {
+        this.dayViewHolder = dayViewHolder;
+    }
+
+    DayViewHolder getDayViewHolder() {
+        return dayViewHolder;
     }
 
     @Override
