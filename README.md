@@ -1,6 +1,8 @@
 Calendar Selector
 =================
 
+[中文][9]
+
 A `calendar selector` for select dates, support select a `continuous` period of time and some `discontinuous` dates.
 
 Supported functionality:
@@ -290,3 +292,4 @@ License
  [6]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/normal/StateSavedActivity.java
  [7]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/custom/DecorDayViewInflater.java
  [8]: https://github.com/TUBB/CalendarSelector/blob/master/app/src/main/java/com/tubb/calendarselector/custom/AnimDayViewInflater.java
+ [9]: http://tubb.github.io/2016/04/17/Android%E6%97%A5%E6%9C%9F%E6%98%BE%E7%A4%BA%E5%92%8C%E9%80%89%E6%8B%A9%E5%BA%93/
