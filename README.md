@@ -1,7 +1,7 @@
 Calendar Selector
 =================
 
-[中文][9]
+[中文文档][9]
 
 A `calendar selector` for select dates, support select a `continuous` period of time and some `discontinuous` dates.
 
