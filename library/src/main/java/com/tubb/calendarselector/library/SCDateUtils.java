@@ -117,6 +117,16 @@ public class SCDateUtils {
         return year == getCurrentYear() && month == getCurrentMonth() && day == getCurrentDay();
     }
 
+    /**
+     * calculate day count
+     * @param startYear start year
+     * @param startMonth start month
+     * @param startDay start day
+     * @param endYear end year
+     * @param endMonth end month
+     * @param endDay end day
+     * @return day count
+     */
     public static int countDays(int startYear, int startMonth, int startDay, int endYear, int endMonth, int endDay) {
         Calendar startC = Calendar.getInstance();
         startC.set(Calendar.YEAR, startYear);
@@ -130,10 +140,18 @@ public class SCDateUtils {
     }
 
     public static List<SCMonth> generateMonths(int startYear, int endYear){
-        return generateMonths(startYear, 1, endYear, 12);
+        return generateMonths(startYear, 1, endYear, 12, SCMonth.SUNDAY_OF_WEEK);
     }
 
-    public static List<SCMonth> generateMonths(int startYear, int startMonth, int endYear, int endMonth){
+    public static List<SCMonth> generateMonths(int startYear, int endYear, @SCMonth.WeekType int weekType){
+        return generateMonths(startYear, 1, endYear, 12, weekType);
+    }
+
+    public static List<SCMonth> generateMonths(int startYear, int startMonth, int endYear, int endMonth) {
+        return generateMonths(startYear, startMonth, endYear, endMonth, SCMonth.SUNDAY_OF_WEEK);
+    }
+
+    public static List<SCMonth> generateMonths(int startYear, int startMonth, int endYear, int endMonth, @SCMonth.WeekType int weekType){
 
         if(startYear <= 0 || endYear <= 0 || startMonth <= 0 || endMonth <= 0 || startMonth > 12 || endMonth > 12)
             throw new IllegalArgumentException("Invalid startYear、startMonth、endYear or endMonth");
@@ -146,20 +164,20 @@ public class SCDateUtils {
         List<SCMonth> data = new ArrayList<>();
         if(startYear == endYear){
             for (int i = startMonth; i <= endMonth; i++) {
-                data.add(new SCMonth(startYear, i));
+                data.add(new SCMonth(startYear, i, weekType));
             }
         }else{
             for (int i = startMonth; i <= 12; i++) {
-                data.add(new SCMonth(startYear, i));
+                data.add(new SCMonth(startYear, i, weekType));
             }
             while (endYear - startYear > 1){
                 startYear++;
                 for (int i = 1; i <= 12; i++) {
-                    data.add(new SCMonth(startYear, i));
+                    data.add(new SCMonth(startYear, i, weekType));
                 }
             }
             for (int i = 1; i <= endMonth; i++) {
-                data.add(new SCMonth(endYear, i));
+                data.add(new SCMonth(endYear, i, weekType));
             }
         }
         return data;

@@ -22,8 +22,6 @@ public class FullDay implements Parcelable {
     protected int month;
     protected int day;
 
-//    private DayViewHolder dayViewHolder;
-
     public FullDay(int year, int month, int day) {
         this.year = year;
         this.month = month;

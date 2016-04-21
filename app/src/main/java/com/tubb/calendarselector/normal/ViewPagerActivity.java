@@ -39,7 +39,7 @@ public class ViewPagerActivity extends AppCompatActivity implements Protocol {
         tvMonthTitle = (TextView) findViewById(R.id.tvMonthTitle);
         vpMonth = (ViewPager) findViewById(R.id.vpMonth);
 
-        months = SCDateUtils.generateMonths(2016, 3, 2016, 12);
+        months = SCDateUtils.generateMonths(2016, 3, 2016, 12, SCMonth.SUNDAY_OF_WEEK);
         tvMonthTitle.setText(months.get(0).toString());
 
         List<Fragment> fragments = new ArrayList<>(months.size());

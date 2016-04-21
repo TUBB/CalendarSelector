@@ -26,7 +26,7 @@ public class NormalActivity extends AppCompatActivity {
             scMonth = savedInstanceState.getParcelable("month");
         }
         if(scMonth == null)
-            scMonth = new SCMonth(2016, 5);
+            scMonth = new SCMonth(2016, 5, SCMonth.SUNDAY_OF_WEEK);
         tvMonthTitle.setText(scMonth.toString());
         monthView.setSCMonth(scMonth);
         monthView.setMonthDayClickListener(new MonthView.OnMonthDayClickListener() {

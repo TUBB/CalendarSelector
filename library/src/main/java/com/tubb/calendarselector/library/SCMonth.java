@@ -16,19 +16,125 @@ public class SCMonth implements Parcelable {
     public static final int SUNDAY_OF_WEEK = 1;
     public static final int MONDAY_OF_WEEK = 2;
     public static final int SATURDAY_OF_WEEK = 7;
+    public static final int ROW_COUNT = 6;
+    public static final int COL_COUNT = 7;
 
     protected int year;
     protected int month;
     protected List<FullDay> selectedDays = new ArrayList<>(5);
+    private FullDay[][] monthDays = new FullDay[ROW_COUNT][COL_COUNT];
+    private int realRowCount;
+    private int firstDayOfWeek;
+    private int firstdayOfWeekPosInMonth;
+    private int dayCountOfPrevMonth;
+    private SCMonth prevMonth;
+    private SCMonth nextMonth;
 
-    public SCMonth(int year, int month){
+    public SCMonth(int year, int month, @WeekType int firstDayOfWeek){
         this.year = year;
         this.month = month;
+        this.firstDayOfWeek = firstDayOfWeek;
+        calculateDays();
+    }
+
+    SCMonth(int year, int month){
+        this.year = year;
+        this.month = month;
+    }
+
+    private void calculateDays() {
+
+        prevMonth = SCDateUtils.prevMonth(getYear(), getMonth());
+        dayCountOfPrevMonth = SCDateUtils.getDayCountOfMonth(prevMonth.getYear(), prevMonth.getMonth());
+        nextMonth = SCDateUtils.nextMonth(getYear(), getMonth());
+        // the first day of month is which week's day
+        firstdayOfWeekPosInMonth = SCDateUtils.mapDayOfWeekInMonth(SCDateUtils.getDayOfWeekInMonth(getYear(), getMonth()), firstDayOfWeek);
+        int dayCountOfMonth = SCDateUtils.getDayCountOfMonth(getYear(), getMonth());
+
+        int currentRealRowCount = 0;
+        int day = 1;
+        for (int row = 0; row < ROW_COUNT; row++){
+            boolean isAllRowEmpty = true;
+            for (int col = 1; col <= COL_COUNT; col++){
+                int monthPosition = col + row * COL_COUNT;
+                FullDay oldFullDay = monthDays[row][col-1];
+                if(monthPosition >= firstdayOfWeekPosInMonth
+                        && monthPosition < firstdayOfWeekPosInMonth + dayCountOfMonth){ // current month
+                    if(oldFullDay == null){
+                        FullDay currentMonthDay = new FullDay(getYear(), getMonth(), day);
+                        monthDays[row][col-1] = currentMonthDay;
+                    }else{
+                        oldFullDay.setYear(getYear());
+                        oldFullDay.setMonth(getMonth());
+                        oldFullDay.setDay(day);
+                    }
+                    day++;
+                    isAllRowEmpty = false;
+                }else if(monthPosition < firstdayOfWeekPosInMonth){ // prev month
+                    int prevDay = dayCountOfPrevMonth - (firstdayOfWeekPosInMonth - 1 - monthPosition);
+                    if(oldFullDay == null){
+                        FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
+                        monthDays[row][col-1] = prevMonthDay;
+                    }else{
+                        oldFullDay.setYear(prevMonth.getYear());
+                        oldFullDay.setMonth(prevMonth.getMonth());
+                        oldFullDay.setDay(prevDay);
+                    }
+                }else if(monthPosition >= firstdayOfWeekPosInMonth + dayCountOfMonth){ // next month
+                    if(oldFullDay == null){
+                        FullDay nextMonthDay = new FullDay(nextMonth.getYear(), nextMonth.getMonth(),
+                                monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
+                        monthDays[row][col-1] = nextMonthDay;
+                    }else{
+                        oldFullDay.setYear(nextMonth.getYear());
+                        oldFullDay.setMonth(nextMonth.getMonth());
+                        oldFullDay.setDay(monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
+                    }
+                }
+            }
+            if(!isAllRowEmpty){
+                currentRealRowCount++;
+            }
+        }
+
+        setRealRowCount(currentRealRowCount);
     }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SUNDAY_OF_WEEK, MONDAY_OF_WEEK, SATURDAY_OF_WEEK})
     public @interface WeekType{}
+
+    void setMonthDays(FullDay[][] monthDays) {
+        this.monthDays = monthDays;
+    }
+
+    public SCMonth getNextMonth() {
+        return nextMonth;
+    }
+
+    public SCMonth getPrevMonth() {
+        return prevMonth;
+    }
+
+    public int getDayCountOfPrevMonth() {
+        return dayCountOfPrevMonth;
+    }
+
+    public int getFirstdayOfWeekPosInMonth() {
+        return firstdayOfWeekPosInMonth;
+    }
+
+    public FullDay[][] getMonthDays() {
+        return monthDays;
+    }
+
+    public void setRealRowCount(int realRowCount) {
+        this.realRowCount = realRowCount;
+    }
+
+    public int getRealRowCount() {
+        return realRowCount;
+    }
 
     public void setMonth(int month) {
         this.month = month;
@@ -66,7 +172,6 @@ public class SCMonth implements Parcelable {
         SCMonth SCMonth = (SCMonth) o;
         if (year != SCMonth.year) return false;
         return month == SCMonth.month;
-
     }
 
     @Override
@@ -97,13 +202,16 @@ public class SCMonth implements Parcelable {
         this.year = in.readInt();
         this.month = in.readInt();
         this.selectedDays = in.createTypedArrayList(FullDay.CREATOR);
+        calculateDays();
     }
 
     public static final Parcelable.Creator<SCMonth> CREATOR = new Parcelable.Creator<SCMonth>() {
+        @Override
         public SCMonth createFromParcel(Parcel source) {
             return new SCMonth(source);
         }
 
+        @Override
         public SCMonth[] newArray(int size) {
             return new SCMonth[size];
         }

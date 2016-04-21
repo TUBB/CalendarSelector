@@ -36,13 +36,13 @@ public class AnimDayViewActivity extends AppCompatActivity {
             scMonth = savedInstanceState.getParcelable("month");
         }
         if(scMonth == null)
-            scMonth = new SCMonth(2016, 5);
+            scMonth = new SCMonth(2016, 5, SCMonth.SUNDAY_OF_WEEK);
         tvMonthTitle.setText(scMonth.toString());
         segmentMode();
     }
 
     private void segmentMode(){
-        scMonth = new SCMonth(2016, 5);
+        scMonth = new SCMonth(2016, 5, SCMonth.SUNDAY_OF_WEEK);
         monthView.setSCMonth(scMonth, new AnimDayViewInflater(this));
         selector = new SingleMonthSelector(SingleMonthSelector.Mode.SEGMENT);
         selector.setSegmentSelectListener(new SegmentSelectListener() {
@@ -77,7 +77,7 @@ public class AnimDayViewActivity extends AppCompatActivity {
     }
 
     private void intervalMode(){
-        scMonth = new SCMonth(2016, 5);
+        scMonth = new SCMonth(2016, 5, SCMonth.SUNDAY_OF_WEEK);
         monthView.setSCMonth(scMonth, new AnimDayViewInflater(this));
         selector = new SingleMonthSelector(SingleMonthSelector.Mode.INTERVAL);
         selector.setIntervalSelectListener(new IntervalSelectListener() {

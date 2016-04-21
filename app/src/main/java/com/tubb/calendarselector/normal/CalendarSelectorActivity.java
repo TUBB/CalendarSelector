@@ -114,7 +114,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
     }
 
     public List<SCMonth> getData() {
-        return SCDateUtils.generateMonths(2016, 2018);
+        return SCDateUtils.generateMonths(2016, 2018, SCMonth.SUNDAY_OF_WEEK);
     }
 
     class CalendarAdpater extends RecyclerView.Adapter<CalendarViewHolder>{

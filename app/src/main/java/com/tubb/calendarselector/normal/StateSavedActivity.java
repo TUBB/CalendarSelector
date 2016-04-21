@@ -78,7 +78,7 @@ public class StateSavedActivity extends AppCompatActivity {
     }
 
     public List<SCMonth> getData() {
-        return SCDateUtils.generateMonths(2016, 2017);
+        return SCDateUtils.generateMonths(2016, 2017, SCMonth.SUNDAY_OF_WEEK);
     }
 
     class CalendarAdpater extends RecyclerView.Adapter<CalendarViewHolder>{

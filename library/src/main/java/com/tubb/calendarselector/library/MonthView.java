@@ -24,19 +24,16 @@ public class MonthView extends FrameLayout{
 
     private static final String TAG = "mv";
 
-    public static final int ROW_COUNT = 6;
-    public static final int COL_COUNT = 7;
+    public static final int ROW_COUNT = SCMonth.ROW_COUNT;
+    public static final int COL_COUNT = SCMonth.COL_COUNT;
 
     private boolean neededRelayout = false;
     private boolean drawMonthDay = true;
     private int realRowCount = ROW_COUNT;
     protected Context mContext;
     protected DisplayMetrics mDisplayMetrics;
-    // the first day of week (support sunday,monday,saturday)
-    private int firstDayOfWeek;
     private OnMonthDayClickListener mMonthDayClickListener;
 
-    private FullDay[][] monthDays = new FullDay[ROW_COUNT][COL_COUNT];
     private DayViewHolder[][] dayViewHolders = new DayViewHolder[ROW_COUNT][COL_COUNT];
     private DayViewInflater dayInflater;
     private SparseArray<DayViewInflater.Decor> horizontalDecors = new SparseArray<>(ROW_COUNT+1);
@@ -47,11 +44,6 @@ public class MonthView extends FrameLayout{
     private int dayWidth;
     private int dayHeight;
     private SCMonth scMonth;
-    private SCMonth prevMonth;
-    private SCMonth nextMonth;
-
-    // the first day of month is which week's day
-    private int firstdayOfWeekPosInMonth;
 
     public MonthView(Context context) {
         super(context);
@@ -68,12 +60,11 @@ public class MonthView extends FrameLayout{
         mContext = context;
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MonthView, 0, defStyleAttr);
         drawMonthDay = a.getBoolean(R.styleable.MonthView_sc_draw_monthday_only, drawMonthDay);
-        firstDayOfWeek = a.getInt(R.styleable.MonthView_sc_firstday_week, SCMonth.SUNDAY_OF_WEEK);
         mDisplayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(mDisplayMetrics);
         mDefaultWidth = mDisplayMetrics.widthPixels;
-        mDefaultHeight = mDefaultWidth / 7 * 6;
+        mDefaultHeight = mDefaultWidth / COL_COUNT * ROW_COUNT;
         dayInflater = new DefaultDayViewInflater(getContext());
         if(isInEditMode()){
             String testMonth = a.getString(R.styleable.MonthView_sc_month);
@@ -155,7 +146,7 @@ public class MonthView extends FrameLayout{
     }
 
     private void drawDays(final int row, final int col, View dayView) {
-        FullDay fullDay = monthDays[row][col];
+        FullDay fullDay = scMonth.getMonthDays()[row][col];
         DayViewHolder dayViewHolder = dayViewHolders[row][col];
         boolean isPrevMonthDay = SCDateUtils.isPrevMonthDay(
                 scMonth.getYear(), scMonth.getMonth(),
@@ -185,82 +176,35 @@ public class MonthView extends FrameLayout{
 
     private void calculateDays() {
 
-        prevMonth = SCDateUtils.prevMonth(scMonth.getYear(), scMonth.getMonth());
-        int dayCountOfPrevMonth = SCDateUtils.getDayCountOfMonth(prevMonth.getYear(), prevMonth.getMonth());
-        nextMonth = SCDateUtils.nextMonth(scMonth.getYear(), scMonth.getMonth());
-        firstdayOfWeekPosInMonth = SCDateUtils.mapDayOfWeekInMonth(SCDateUtils.getDayOfWeekInMonth(scMonth.getYear(), scMonth.getMonth()), firstDayOfWeek);
-        int dayCountOfMonth = SCDateUtils.getDayCountOfMonth(scMonth.getYear(), scMonth.getMonth());
-
-        int currentRealRowCount = 0;
-        int day = 1;
-        for (int row = 0; row < ROW_COUNT; row++){
-            boolean isAllRowEmpty = true;
-            for (int col = 1; col <= COL_COUNT; col++){
-                int monthPosition = col + row * COL_COUNT;
-                FullDay oldFullDay = monthDays[row][col-1];
-                if(monthPosition >= firstdayOfWeekPosInMonth
-                        && monthPosition < firstdayOfWeekPosInMonth + dayCountOfMonth){ // current month
-                    if(oldFullDay == null){
-                        FullDay currentMonthDay = new FullDay(scMonth.getYear(), scMonth.getMonth(), day);
-                        monthDays[row][col-1] = currentMonthDay;
-                    }else{
-                        oldFullDay.setYear(scMonth.getYear());
-                        oldFullDay.setMonth(scMonth.getMonth());
-                        oldFullDay.setDay(day);
-                    }
-                    day++;
-                    isAllRowEmpty = false;
-                }else if(monthPosition < firstdayOfWeekPosInMonth){ // prev month
-                    int prevDay = dayCountOfPrevMonth - (firstdayOfWeekPosInMonth - 1 - monthPosition);
-                    if(oldFullDay == null){
-                        FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
-                        monthDays[row][col-1] = prevMonthDay;
-                    }else{
-                        oldFullDay.setYear(prevMonth.getYear());
-                        oldFullDay.setMonth(prevMonth.getMonth());
-                        oldFullDay.setDay(prevDay);
-                    }
-                }else if(monthPosition >= firstdayOfWeekPosInMonth + dayCountOfMonth){ // next month
-                    if(oldFullDay == null){
-                        FullDay nextMonthDay = new FullDay(nextMonth.getYear(), nextMonth.getMonth(),
-                                monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
-                        monthDays[row][col-1] = nextMonthDay;
-                    }else{
-                        oldFullDay.setYear(nextMonth.getYear());
-                        oldFullDay.setMonth(nextMonth.getMonth());
-                        oldFullDay.setDay(monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
-                    }
-                }
-            }
-            if(!isAllRowEmpty) currentRealRowCount++;
-        }
-
         if(drawMonthDay) {
-            if(realRowCount != currentRealRowCount) neededRelayout = true;
-            realRowCount = currentRealRowCount;
+            if(realRowCount != scMonth.getRealRowCount()) neededRelayout = true;
+            realRowCount = scMonth.getRealRowCount();
         } else{
             // adjust display
-            if(firstdayOfWeekPosInMonth == 1
-                    && (currentRealRowCount == (ROW_COUNT - 1) || currentRealRowCount == (ROW_COUNT - 2))
+            if(scMonth.getFirstdayOfWeekPosInMonth() == 1
+                    && (scMonth.getRealRowCount() == (ROW_COUNT - 1) || scMonth.getRealRowCount() == (ROW_COUNT - 2))
                     && isFirstRowFullCurrentMonthDays()){
                 FullDay[][] tempMonthdays = new FullDay[ROW_COUNT][COL_COUNT];
                 FullDay[] ssDays = new FullDay[COL_COUNT];
                 tempMonthdays[0] = ssDays;
                 for (int monthPosition = COL_COUNT - 1; monthPosition >= 0; monthPosition--){
-                    int prevDay = dayCountOfPrevMonth - monthPosition;
-                    FullDay prevMonthDay = new FullDay(prevMonth.getYear(), prevMonth.getMonth(), prevDay);
+                    int prevDay = scMonth.getDayCountOfPrevMonth() - monthPosition;
+                    FullDay prevMonthDay = new FullDay(scMonth.getPrevMonth().getYear(),
+                            scMonth.getPrevMonth().getMonth(), prevDay);
                     ssDays[COL_COUNT - 1 - monthPosition] = prevMonthDay;
                 }
-                System.arraycopy(monthDays, 0, tempMonthdays, 1, 5);
-                monthDays = tempMonthdays;
+                System.arraycopy(scMonth.getMonthDays(), 0, tempMonthdays, 1, 5);
+                scMonth.setMonthDays(tempMonthdays);
             }
         }
     }
 
     private boolean isFirstRowFullCurrentMonthDays() {
-        FullDay[] ssDays = monthDays[0];
+        FullDay[] ssDays = scMonth.getMonthDays()[0];
         for (FullDay day : ssDays){
-            if(SCDateUtils.isPrevMonthDay(scMonth.getYear(), scMonth.getMonth(), day.getYear(), day.getMonth())) return false;
+            if(SCDateUtils.isPrevMonthDay(scMonth.getYear(), scMonth.getMonth(), day.getYear(),
+                    day.getMonth()))
+                return false;
         }
         return true;
     }
@@ -327,16 +271,22 @@ public class MonthView extends FrameLayout{
         if (row >= realRowCount || col >= COL_COUNT){
             Log.d(TAG, "Out of bound");
         }else{
-            FullDay[] ssDays = monthDays[row];
+            FullDay[] ssDays = scMonth.getMonthDays()[row];
             if(ssDays != null && ssDays.length > 0){
                 FullDay ssDay = ssDays[col];
                 if(mMonthDayClickListener != null) {
-                    if (SCDateUtils.isMonthDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
-                        mMonthDayClickListener.onMonthDayClick(new FullDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getDay()));
-                    else if(SCDateUtils.isPrevMonthDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
-                        mMonthDayClickListener.onMonthDayClick(new FullDay(prevMonth.getYear(), prevMonth.getMonth(), ssDay.getDay()));
-                    else if(SCDateUtils.isNextMonthDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getYear(), ssDay.getMonth()))
-                        mMonthDayClickListener.onMonthDayClick(new FullDay(nextMonth.getYear(), nextMonth.getMonth(), ssDay.getDay()));
+                    if (SCDateUtils.isMonthDay(scMonth.getYear(), scMonth.getMonth(),
+                            ssDay.getYear(), ssDay.getMonth()))
+                        mMonthDayClickListener.onMonthDayClick(new FullDay(scMonth.getYear(),
+                                scMonth.getMonth(), ssDay.getDay()));
+                    else if(SCDateUtils.isPrevMonthDay(scMonth.getYear(), scMonth.getMonth(),
+                            ssDay.getYear(), ssDay.getMonth()))
+                        mMonthDayClickListener.onMonthDayClick(new FullDay(scMonth.getPrevMonth().getYear(),
+                                scMonth.getPrevMonth().getMonth(), ssDay.getDay()));
+                    else if(SCDateUtils.isNextMonthDay(scMonth.getYear(), scMonth.getMonth(), ssDay.getYear(),
+                            ssDay.getMonth()))
+                        mMonthDayClickListener.onMonthDayClick(new FullDay(scMonth.getNextMonth().getYear(),
+                                scMonth.getNextMonth().getMonth(), ssDay.getDay()));
                 }
             }else{
                 Log.d(TAG, "Not found the row's days");
@@ -421,9 +371,9 @@ public class MonthView extends FrameLayout{
             String[] ym = testMonth.split("-");
             int year = Integer.parseInt(ym[0]);
             int month = Integer.parseInt(ym[1]);
-            scMonth = new SCMonth(year, month);
+            scMonth = new SCMonth(year, month, SCMonth.SUNDAY_OF_WEEK);
         }else{
-            scMonth = new SCMonth(SCDateUtils.getCurrentYear(), SCDateUtils.getCurrentMonth());
+            scMonth = new SCMonth(SCDateUtils.getCurrentYear(), SCDateUtils.getCurrentMonth(), SCMonth.SUNDAY_OF_WEEK);
         }
         if(!TextUtils.isEmpty(selectedDays)){
             String[] days = selectedDays.split(",");
@@ -441,25 +391,6 @@ public class MonthView extends FrameLayout{
                 selectedDaysChanged();
             }
         });
-    }
-
-    /**
-     * @return the first day of month is which week's day
-     */
-    public int getFirstdayOfWeekPosInMonth() {
-        return firstdayOfWeekPosInMonth;
-    }
-
-    /**
-     * @return the first day of week (support sunday,monday,saturday)
-     */
-    @SCMonth.WeekType
-    public int getFirstDayOfWeek() {
-        return firstDayOfWeek;
-    }
-
-    public void setFirstDayOfWeek(@SCMonth.WeekType int firstDayOfWeek) {
-        this.firstDayOfWeek = firstDayOfWeek;
     }
 
     public interface OnMonthDayClickListener{
