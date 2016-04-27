@@ -418,6 +418,12 @@ public class MonthView extends FrameLayout{
 
     public void refresh() {
         selectedDaysChanged();
+        if(shouldResetDecor){
+            for (int i = 0; i < horizontalDecors.size(); i++) {
+                DayViewInflater.Decor decor = horizontalDecors.get(i);
+                if(decor != null && decor.getDecorView() != null) decor.getDecorView().scrollTo(0, 0);
+            }
+        }
     }
 
     public interface OnMonthDayClickListener{

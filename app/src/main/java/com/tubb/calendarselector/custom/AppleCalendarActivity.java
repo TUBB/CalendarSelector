@@ -29,8 +29,10 @@ import com.tubb.calendarselector.library.SCMonth;
 import com.tubb.calendarselector.library.SegmentSelectListener;
 import com.tubb.calendarselector.library.SingleMonthSelector;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Created by tubingbing on 16/4/25.
@@ -63,6 +65,7 @@ public class AppleCalendarActivity extends AppCompatActivity{
 
         List<SCMonth> months;
         DayViewInflater appleCalendarDayViewInflater;
+        Set<Integer> animPositionSet = new HashSet<>();
 
         public CalendarAdpater(List<SCMonth> months){
             this.months = months;
@@ -74,47 +77,58 @@ public class AppleCalendarActivity extends AppCompatActivity{
             return new CalendarViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_apple_calendar, parent, false));
         }
 
-        @Override
-        public void onBindViewHolder(final CalendarViewHolder holder, int position) {
-            SCMonth scMonth = months.get(position);
+        public void onBindViewHolder(final CalendarViewHolder holder, final int position) {
+            final SCMonth scMonth = months.get(position);
             holder.tvMonthTitle.setText(String.format(Locale.getDefault(), "%d月", scMonth.getMonth()));
             holder.monthView.setSCMonth(scMonth, appleCalendarDayViewInflater);
-            final int firstdayOfWeekPosInMonth = scMonth.getFirstdayOfWeekPosInMonth();
+
             // wait for MonthView measure finish
             holder.monthView.post(new Runnable() {
                 @Override
                 public void run() {
-                    ValueAnimator lineAnimator = ValueAnimator.ofInt(0, -(firstdayOfWeekPosInMonth - 1) * holder.monthView.getDayWidth());
-                    lineAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                        @Override
-                        public void onAnimationUpdate(ValueAnimator animation) {
-                            int scrollX = (int) animation.getAnimatedValue();
-                            holder.flScrollLine.scrollTo(scrollX , 0);
-                        }
-                    });
 
-                    ValueAnimator monthAnimator = ValueAnimator.ofInt(0, -(firstdayOfWeekPosInMonth - 1) * holder.monthView.getDayWidth()
-                            - (holder.monthView.getDayWidth() / 2 - holder.tvMonthTitle.getWidth() / 2));
-                    monthAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                        @Override
-                        public void onAnimationUpdate(ValueAnimator animation) {
-                            int scrollX = (int) animation.getAnimatedValue();
-                            holder.flScrollMonth.scrollTo(scrollX , 0);
-                        }
-                    });
-                    AnimatorSet animationSet = new AnimatorSet();
-                    animationSet.play(monthAnimator).with(lineAnimator);
-                    animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
-                    animationSet.setDuration(500);
-                    animationSet.start();
+                    final int firstdayOfWeekPosInMonth = scMonth.getFirstdayOfWeekPosInMonth();
+                    final int lineScrollX = -(firstdayOfWeekPosInMonth - 1) * holder.monthView.getDayWidth();
+                    final int monthScrollX = -(firstdayOfWeekPosInMonth - 1) * holder.monthView.getDayWidth()
+                            - (holder.monthView.getDayWidth() / 2 - holder.tvMonthTitle.getWidth() / 2);
+
+                    // avoid anim every time
+                    if(!animPositionSet.contains(position)){
+                        animPositionSet.add(position);
+                        ValueAnimator lineAnimator = ValueAnimator.ofInt(0, lineScrollX);
+                        lineAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator animation) {
+                                int scrollX = (int) animation.getAnimatedValue();
+                                holder.flScrollLine.scrollTo(scrollX , 0);
+                            }
+                        });
+
+                        ValueAnimator monthAnimator = ValueAnimator.ofInt(0, monthScrollX);
+                        monthAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator animation) {
+                                int scrollX = (int) animation.getAnimatedValue();
+                                holder.flScrollMonth.scrollTo(scrollX , 0);
+                            }
+                        });
+                        AnimatorSet animationSet = new AnimatorSet();
+                        animationSet.play(monthAnimator).with(lineAnimator);
+                        animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
+                        animationSet.setDuration(500);
+                        animationSet.start();
+                    }else{
+                        holder.flScrollLine.scrollTo(lineScrollX , 0);
+                        holder.flScrollMonth.scrollTo(monthScrollX , 0);
+                    }
 
                     int dayCount = holder.monthView.getCurrentMonthLastRowDayCount();
                     View decorView = holder.monthView.getLastHorizontalDecor();
                     if(decorView != null)
                         decorView.scrollTo((7 - dayCount)*holder.monthView.getDayWidth(), 0);
-
                 }
             });
+
             selector.bind(rvCalendar, holder.monthView, position);
         }
 
