@@ -2,8 +2,12 @@ package com.tubb.calendarselector.library;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.IntDef;
 
 import com.tubb.calendarselector.custom.DayViewHolder;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by tubingbing on 16/3/1.
@@ -21,14 +25,13 @@ public class FullDay implements Parcelable {
     protected int year;
     protected int month;
     protected int day;
+    protected int weekOf;
 
     public FullDay(int year, int month, int day) {
         this.year = year;
         this.month = month;
         this.day = day;
     }
-
-    public @interface WeekOf{}
 
     public int getYear() {
         return year;
@@ -54,6 +57,10 @@ public class FullDay implements Parcelable {
         this.day = day;
     }
 
+    public void setWeekOf(int weekOf) {
+        this.weekOf = weekOf;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -75,12 +82,20 @@ public class FullDay implements Parcelable {
         return result;
     }
 
+    /**
+     * get the position of week ([1-7])
+     */
+    public int getWeekOf() {
+        return weekOf;
+    }
+
     @Override
     public String toString() {
         return "FullDay{" +
                 "year=" + year +
                 ", month=" + month +
                 ", day=" + day +
+                ", weekOf=" + weekOf +
                 '}';
     }
 
@@ -94,22 +109,23 @@ public class FullDay implements Parcelable {
         dest.writeInt(this.year);
         dest.writeInt(this.month);
         dest.writeInt(this.day);
-    }
-
-    public FullDay() {
+        dest.writeInt(this.weekOf);
     }
 
     protected FullDay(Parcel in) {
         this.year = in.readInt();
         this.month = in.readInt();
         this.day = in.readInt();
+        this.weekOf = in.readInt();
     }
 
     public static final Parcelable.Creator<FullDay> CREATOR = new Parcelable.Creator<FullDay>() {
+        @Override
         public FullDay createFromParcel(Parcel source) {
             return new FullDay(source);
         }
 
+        @Override
         public FullDay[] newArray(int size) {
             return new FullDay[size];
         }

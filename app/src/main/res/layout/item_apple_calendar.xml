@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sc="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <FrameLayout
+        android:id="@+id/flScrollMonth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvMonthTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            tools:text="1月"
+            android:textSize="16sp"
+            android:textColor="@color/c_33ccff"
+            />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/flScrollLine"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include layout="@layout/view_horizontal_decor"/>
+
+    </FrameLayout>
+
+    <com.tubb.calendarselector.library.MonthView
+        android:id="@+id/ssMv"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        sc:sc_firstday_week="sunday"
+        sc:sc_should_reset_decor="true"
+        sc:sc_month="2016-1"
+        sc:sc_selected_days="11,15,28"
+        />
+</LinearLayout>

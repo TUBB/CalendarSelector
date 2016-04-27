@@ -41,18 +41,21 @@ public abstract class DayViewInflater {
         return (int) (dpValue * scale + 0.5f);
     }
 
+    public boolean isShowHorizontalDecor(int row, int realRowCount) {
+        return true;
+    }
+
+    public boolean isShowVerticalDecorDecor(int col, int realColCount) {
+        return true;
+    }
+
     public static class Decor{
 
-        private boolean showDecor = false;
+        private boolean showDecor = true;
         private View decorView;
 
         public Decor(View decorView){
-            this(decorView, false);
-        }
-
-        public Decor(View decorView, boolean showDecor){
             this.decorView = decorView;
-            this.showDecor = showDecor;
         }
 
         public View getDecorView() {
@@ -61,6 +64,10 @@ public abstract class DayViewInflater {
 
         public boolean isShowDecor() {
             return showDecor;
+        }
+
+        public void setShowDecor(boolean showDecor) {
+            this.showDecor = showDecor;
         }
     }
 }

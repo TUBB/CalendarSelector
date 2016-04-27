@@ -9,6 +9,7 @@
             <enum name="monday" value="2"/>
             <enum name="saturday" value="7"/>
         </attr>
+        <attr name="sc_should_reset_decor" format="boolean"/>
 
         <!-- editor mode only -->
         <!-- test selected days (format:1,2,3,4) -->

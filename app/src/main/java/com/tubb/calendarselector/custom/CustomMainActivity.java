@@ -36,6 +36,9 @@ public class CustomMainActivity extends AppCompatActivity {
             case R.id.bt_decor:
                 startActivity(new Intent(this, DecorDayViewActivity.class));
                 break;
+            case R.id.bt_apple_calendar:
+                startActivity(new Intent(this, AppleCalendarActivity.class));
+                break;
         }
     }
 }

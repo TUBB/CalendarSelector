@@ -42,7 +42,6 @@ public class CustomDayViewActivity extends AppCompatActivity {
     }
 
     private void segmentMode(){
-        scMonth = new SCMonth(2016, 2, SCMonth.SUNDAY_OF_WEEK);
         monthView.setSCMonth(scMonth, new CustomDayViewInflater(this));
         selector = new SingleMonthSelector(SingleMonthSelector.Mode.SEGMENT);
         selector.setSegmentSelectListener(new SegmentSelectListener() {

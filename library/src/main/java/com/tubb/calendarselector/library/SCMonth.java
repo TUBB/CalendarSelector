@@ -3,6 +3,7 @@ package com.tubb.calendarselector.library;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -91,6 +92,7 @@ public class SCMonth implements Parcelable {
                         oldFullDay.setDay(monthPosition - (firstdayOfWeekPosInMonth + dayCountOfMonth) + 1);
                     }
                 }
+                monthDays[row][col-1].setWeekOf(col);
             }
             if(!isAllRowEmpty){
                 currentRealRowCount++;

@@ -3,13 +3,9 @@ package com.tubb.calendarselector.custom;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.tubb.calendarselector.R;
@@ -18,15 +14,15 @@ import com.tubb.calendarselector.library.FullDay;
 /**
  * Created by tubingbing on 16/4/14.
  */
-public class DecorDayViewInflater extends DayViewInflater{
+public class AppleCalendarDayViewInflater extends DayViewInflater{
 
-    public DecorDayViewInflater(Context context) {
+    public AppleCalendarDayViewInflater(Context context) {
         super(context);
     }
 
     @Override
     public DayViewHolder inflateDayView(ViewGroup container) {
-        View dayView = mLayoutInflater.inflate(R.layout.layout_dayview_decor_custom, container, false);
+        View dayView = mLayoutInflater.inflate(R.layout.layout_dayview_default, container, false);
         return new CustomDayViewHolder(dayView);
     }
 
@@ -36,8 +32,9 @@ public class DecorDayViewInflater extends DayViewInflater{
     }
 
     @Override
-    public Decor inflateVerticalDecor(ViewGroup container, int col, int totalCol) {
-        return new Decor(mLayoutInflater.inflate(R.layout.view_vertical_decor, container, false));
+    public boolean isShowHorizontalDecor(int row, int realRowCount) {
+        if(row == 0 || row == realRowCount) return false;
+        return super.isShowHorizontalDecor(row, realRowCount);
     }
 
     public static class CustomDayViewHolder extends DayViewHolder{
@@ -55,6 +52,8 @@ public class DecorDayViewInflater extends DayViewInflater{
 
         @Override
         public void setCurrentMonthDayText(FullDay day, boolean isSelected) {
+            if(day.getWeekOf() == FullDay.WEEK_1 || day.getWeekOf() == FullDay.WEEK_7)
+                tvDay.setTextColor(mPrevMonthDayTextColor);
             boolean oldSelected = tvDay.isSelected();
             tvDay.setText(String.valueOf(day.getDay()));
             tvDay.setSelected(isSelected);

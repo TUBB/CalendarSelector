@@ -29,6 +29,7 @@ public class MonthView extends FrameLayout{
 
     private boolean neededRelayout = false;
     private boolean drawMonthDay = true;
+    private boolean shouldResetDecor = false;
     private int realRowCount = ROW_COUNT;
     protected Context mContext;
     protected DisplayMetrics mDisplayMetrics;
@@ -60,6 +61,7 @@ public class MonthView extends FrameLayout{
         mContext = context;
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MonthView, 0, defStyleAttr);
         drawMonthDay = a.getBoolean(R.styleable.MonthView_sc_draw_monthday_only, drawMonthDay);
+        shouldResetDecor = a.getBoolean(R.styleable.MonthView_sc_should_reset_decor, false);
         mDisplayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(mDisplayMetrics);
@@ -74,7 +76,7 @@ public class MonthView extends FrameLayout{
         a.recycle();
     }
 
-    public void setSCMonth(SCMonth scMonth, DayViewInflater dayInflater){
+    public void setSCMonth(final SCMonth scMonth, DayViewInflater dayInflater){
         if(scMonth.getYear() <=0 || scMonth.getMonth() <=0 || scMonth.getMonth() > 12)
             throw new IllegalArgumentException("Invalidate year or month");
         if(dayInflater != null){
@@ -85,17 +87,12 @@ public class MonthView extends FrameLayout{
         if(getChildCount() > 0){
             refresh();
         }else{
-            if(!isInEditMode()){
-                // wait for measure finish
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        createDayViews();
-                    }
-                });
-            }else{
-                createDayViews();
-            }
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    createDayViews();
+                }
+            });
         }
         // when use in the recyclerview, each item's height may be different, we should requestLayout again
         if(neededRelayout) {
@@ -241,6 +238,12 @@ public class MonthView extends FrameLayout{
             int col = index - row * COL_COUNT;
             drawDays(row, col, childView);
         }
+        if(shouldResetDecor){
+            for (int i = 0; i < horizontalDecors.size(); i++) {
+                DayViewInflater.Decor decor = horizontalDecors.get(i);
+                if(decor != null && decor.getDecorView() != null) decor.getDecorView().scrollTo(0, 0);
+            }
+        }
     }
 
     /**
@@ -265,6 +268,14 @@ public class MonthView extends FrameLayout{
 
     public int getMonth(){
         return getSCMonth().getMonth();
+    }
+
+    public int getDayWidth() {
+        return dayWidth;
+    }
+
+    public int getDayHeight() {
+        return dayHeight;
     }
 
     private void measureClickCell(int row, int col) {
@@ -322,7 +333,7 @@ public class MonthView extends FrameLayout{
 
         for (int row = 0, hCount = realRowCount + 1; row < hCount; row++){
             DayViewInflater.Decor hDecor = horizontalDecors.get(row);
-            if(hDecor != null && hDecor.isShowDecor()){
+            if(hDecor != null && hDecor.isShowDecor() && dayInflater.isShowHorizontalDecor(row, realRowCount)){
                 View decorView = hDecor.getDecorView();
                 if(row == hCount-1){
                     decorView.layout(0, row * dayHeight - decorView.getMeasuredHeight(), getWidth(), row * dayHeight);
@@ -334,10 +345,9 @@ public class MonthView extends FrameLayout{
 
         for (int col = 0, vCount = COL_COUNT + 1; col < vCount; col++){
             DayViewInflater.Decor vDecor = verticalDecors.get(col);
-            if(vDecor != null && vDecor.isShowDecor()){
+            if(vDecor != null && vDecor.isShowDecor() && dayInflater.isShowVerticalDecorDecor(col, COL_COUNT)){
                 View decorView = vDecor.getDecorView();
                 if(col == vCount - 1){
-                    Log.e(TAG, "last col:"+col);
                     decorView.layout(col * dayWidth - decorView.getMeasuredWidth(), 0, col * dayWidth, getHeight());
                 }else{
                     decorView.layout(col * dayWidth, 0, col * dayWidth + decorView.getMeasuredWidth(), getHeight());
@@ -365,6 +375,28 @@ public class MonthView extends FrameLayout{
         return resultSize;
     }
 
+    /**
+     * get the last row current month day count
+     */
+    public int getCurrentMonthLastRowDayCount(){
+        FullDay[] fullDayArr = scMonth.getMonthDays()[realRowCount - 1];
+        int count = 0;
+        for (FullDay fullDay:fullDayArr){
+            if(SCDateUtils.isMonthDay(scMonth.getYear(), scMonth.getMonth(), fullDay.getYear(), fullDay.getMonth()))
+                count ++;
+        }
+        return count;
+    }
+
+    /**
+     * get the last horizontal decor
+     */
+    public View getLastHorizontalDecor(){
+        if(horizontalDecors.size() >= realRowCount-1)
+            return horizontalDecors.get(realRowCount-1).getDecorView();
+        return null;
+    }
+
     private void initEditorMode(String testMonth, String selectedDays){
         SCMonth scMonth;
         if(!TextUtils.isEmpty(testMonth)){
@@ -385,12 +417,7 @@ public class MonthView extends FrameLayout{
     }
 
     public void refresh() {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                selectedDaysChanged();
-            }
-        });
+        selectedDaysChanged();
     }
 
     public interface OnMonthDayClickListener{
