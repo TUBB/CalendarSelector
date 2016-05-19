@@ -19,7 +19,7 @@ public class CalendarSelector extends SingleMonthSelector {
     private static final int LISTENER_HOLDER_TAG_KEY = "LISTENER_HOLDER_TAG_KEY".hashCode();
     protected List<SCMonth> dataList;
 
-    public CalendarSelector(List<SCMonth> dataList, Mode mode){
+    public CalendarSelector(List<SCMonth> dataList, @Mode int mode){
         super(mode);
         this.dataList = dataList;
     }
@@ -27,9 +27,9 @@ public class CalendarSelector extends SingleMonthSelector {
     public void bind(final ViewGroup container, final MonthView monthView, final int position){
         if(container == null || monthView == null || position < 0)
             throw new IllegalArgumentException("Invalid params of bind(final ViewGroup container, final SSMonthView monthView, final int position) method");
-        if(this.mode == Mode.INTERVAL && this.intervalSelectListener == null)
+        if(this.mode == INTERVAL && this.intervalSelectListener == null)
             throw new IllegalArgumentException("Please set IntervalSelectListener for Mode.INTERVAL mode");
-        if(this.mode == Mode.SEGMENT && this.segmentSelectListener == null)
+        if(this.mode == SEGMENT && this.segmentSelectListener == null)
             throw new IllegalArgumentException("Please set SegmentSelectListener for Mode.SEGMENT mode");
         if(container instanceof ListView) throw new IllegalArgumentException("Not support ListView yet");
         ListenerHolder listenerHolder = (ListenerHolder) monthView.getTag(LISTENER_HOLDER_TAG_KEY);

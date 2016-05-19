@@ -52,7 +52,7 @@ public class AppleCalendarActivity extends AppCompatActivity{
         ((SimpleItemAnimator) rvCalendar.getItemAnimator()).setSupportsChangeAnimations(false);
         List<SCMonth> months = SCDateUtils.generateMonths(2016, 2016);
         rvCalendar.setAdapter(new CalendarAdpater(months));
-        selector = new CalendarSelector(months, SingleMonthSelector.Mode.SEGMENT);
+        selector = new CalendarSelector(months, SingleMonthSelector.SEGMENT);
         selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {

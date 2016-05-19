@@ -54,7 +54,7 @@ public class AnimCalendarSelectorActivity extends AppCompatActivity {
 
         data = getData();
 
-        selector = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
+        selector = new CalendarSelector(data, CalendarSelector.SEGMENT);
         selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {
@@ -95,7 +95,7 @@ public class AnimCalendarSelectorActivity extends AppCompatActivity {
      */
     private void intervalMode(){
         data = getData();
-        selector = new CalendarSelector(data, CalendarSelector.Mode.INTERVAL);
+        selector = new CalendarSelector(data, CalendarSelector.INTERVAL);
         selector.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
             public void onIntervalSelect(List<FullDay> selectedDays) {

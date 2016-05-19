@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         sc:sc_firstday_week="sunday"
-        sc:sc_should_reset_decor="true"
+        sc:sc_should_reset_decor="false"
         sc:sc_month="2016-1"
         sc:sc_selected_days="11,15,28"
         />

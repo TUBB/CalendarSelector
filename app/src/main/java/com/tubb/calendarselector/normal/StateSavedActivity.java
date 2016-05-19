@@ -40,7 +40,7 @@ public class StateSavedActivity extends AppCompatActivity {
             data = processor.getDataList();
         }else{ // generate data
             data = getData();
-            processor = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
+            processor = new CalendarSelector(data, CalendarSelector.SEGMENT);
         }
 
         rvCalendar = (RecyclerView) findViewById(R.id.rvCalendar);

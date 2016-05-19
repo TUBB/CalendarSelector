@@ -1,5 +1,6 @@
 package com.tubb.calendarselector.normal;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -44,6 +45,16 @@ public class CalendarSelectorActivity extends AppCompatActivity {
         ((SimpleItemAnimator) rvCalendar.getItemAnimator()).setSupportsChangeAnimations(false);
         data = getData();
         segmentMode();
+
+        rvCalendar.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                Log.e("sc", recyclerView.computeVerticalScrollOffset()+"");
+                View view = recyclerView.findChildViewUnder(dx, dy);
+                Log.e("sc", view.getTag()+"");
+            }
+        });
+
     }
 
     /**
@@ -53,7 +64,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
 
         data = getData();
 
-        selector = new CalendarSelector(data, CalendarSelector.Mode.SEGMENT);
+        selector = new CalendarSelector(data, CalendarSelector.SEGMENT);
         selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {
@@ -94,7 +105,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
      */
     private void intervalMode(){
         data = getData();
-        selector = new CalendarSelector(data, CalendarSelector.Mode.INTERVAL);
+        selector = new CalendarSelector(data, CalendarSelector.INTERVAL);
         selector.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
             public void onIntervalSelect(List<FullDay> selectedDays) {

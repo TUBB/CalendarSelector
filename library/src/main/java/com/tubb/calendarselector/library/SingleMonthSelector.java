@@ -2,6 +2,7 @@ package com.tubb.calendarselector.library;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.IntDef;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,23 +12,26 @@ import java.util.List;
  */
 public class SingleMonthSelector implements Parcelable {
 
-    protected Mode mode;
+    public static final int INTERVAL = 0;
+    public static final int SEGMENT = 1;
+
+    protected int mode = -1;
     protected SelectedRecord startSelectedRecord = new SelectedRecord();
     protected SelectedRecord endSelectedRecord = new SelectedRecord();
     protected List<FullDay> sDays = new LinkedList<>();
     protected IntervalSelectListener intervalSelectListener;
     protected SegmentSelectListener segmentSelectListener;
 
-    public SingleMonthSelector(Mode mode){
+    public SingleMonthSelector(@Mode int mode){
         this.mode = mode;
     }
 
     public void bind(final MonthView monthView){
         if(monthView == null)
             throw new IllegalArgumentException("Invalid params of bind(final ViewGroup container, final SSMonthView monthView, final int position) method");
-        if(this.mode == Mode.INTERVAL && this.intervalSelectListener == null)
+        if(this.mode == INTERVAL && this.intervalSelectListener == null)
             throw new IllegalArgumentException("Please set IntervalSelectListener for Mode.INTERVAL mode");
-        if(this.mode == Mode.SEGMENT && this.segmentSelectListener == null)
+        if(this.mode == SEGMENT && this.segmentSelectListener == null)
             throw new IllegalArgumentException("Please set SegmentSelectListener for Mode.SEGMENT mode");
         monthView.setMonthDayClickListener(new MonthView.OnMonthDayClickListener() {
             @Override
@@ -159,20 +163,33 @@ public class SingleMonthSelector implements Parcelable {
         };
     }
 
-    public enum Mode{
-        INTERVAL,
-        SEGMENT
-    }
+    @IntDef({INTERVAL, SEGMENT})
+    public @interface Mode{}
 
     @Override
     public int describeContents() {
         return 0;
     }
 
-    public static final Creator<SingleMonthSelector> CREATOR = new Creator<SingleMonthSelector>() {
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.mode);
+        dest.writeParcelable(this.startSelectedRecord, flags);
+        dest.writeParcelable(this.endSelectedRecord, flags);
+        dest.writeTypedList(sDays);
+    }
+
+    protected SingleMonthSelector(Parcel in) {
+        this.mode = in.readInt();
+        this.startSelectedRecord = in.readParcelable(SelectedRecord.class.getClassLoader());
+        this.endSelectedRecord = in.readParcelable(SelectedRecord.class.getClassLoader());
+        this.sDays = in.createTypedArrayList(FullDay.CREATOR);
+    }
+
+    public static final Parcelable.Creator<SingleMonthSelector> CREATOR = new Parcelable.Creator<SingleMonthSelector>() {
         @Override
-        public SingleMonthSelector createFromParcel(Parcel in) {
-            return new SingleMonthSelector(in);
+        public SingleMonthSelector createFromParcel(Parcel source) {
+            return new SingleMonthSelector(source);
         }
 
         @Override
@@ -180,21 +197,4 @@ public class SingleMonthSelector implements Parcelable {
             return new SingleMonthSelector[size];
         }
     };
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.mode == null ? -1 : this.mode.ordinal());
-        dest.writeParcelable(this.startSelectedRecord, flags);
-        dest.writeParcelable(this.endSelectedRecord, flags);
-        dest.writeTypedList(sDays);
-    }
-
-    protected SingleMonthSelector(Parcel in) {
-        int tmpMode = in.readInt();
-        this.mode = tmpMode == -1 ? null : Mode.values()[tmpMode];
-        this.startSelectedRecord = in.readParcelable(SelectedRecord.class.getClassLoader());
-        this.endSelectedRecord = in.readParcelable(SelectedRecord.class.getClassLoader());
-        this.sDays = in.createTypedArrayList(FullDay.CREATOR);
-    }
-
 }
