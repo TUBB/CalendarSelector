@@ -16,15 +16,66 @@ public class SingleMonthSelector implements Parcelable {
     public static final int SEGMENT = 1;
 
     protected int mode = -1;
+    private SCMonth mMonth;
     protected SelectedRecord startSelectedRecord = new SelectedRecord();
     protected SelectedRecord endSelectedRecord = new SelectedRecord();
     protected List<FullDay> sDays = new LinkedList<>();
     protected IntervalSelectListener intervalSelectListener;
     protected SegmentSelectListener segmentSelectListener;
 
-    public SingleMonthSelector(@Mode int mode){
+    public SingleMonthSelector(SCMonth scMonth, @Mode int mode){
+        mMonth = scMonth;
         this.mode = mode;
     }
+
+    public void addSelectedSegment(FullDay startDay, FullDay endDay){
+        if (mode == INTERVAL) throw new IllegalArgumentException("Just used with SEGMENT mode!!!");
+        if (startDay == null || endDay == null) throw new IllegalArgumentException("startDay or endDay can't be null");
+        if (startDay.day >= endDay.day) throw new IllegalArgumentException("startDay >= endDay not support");
+        SCMonth comparedMonthStart = new SCMonth(startDay.getYear(), startDay.getMonth());
+        if (!mMonth.equals(comparedMonthStart)) throw new IllegalArgumentException("startDay not belong to scMonth");
+        SCMonth comparedMonthEnd = new SCMonth(endDay.getYear(), endDay.getMonth());
+        if (!mMonth.equals(comparedMonthEnd)) throw new IllegalArgumentException("endDay not belong to scMonth");
+        startSelectedRecord.day = startDay;
+        endSelectedRecord.day = endDay;
+        mMonth.addSelectedDay(startDay);
+        mMonth.addSelectedDay(endDay);
+
+        if(startSelectedRecord.day.getDay() < endSelectedRecord.day.getDay()){
+            for (int day = startSelectedRecord.day.getDay(); day <= endSelectedRecord.day.getDay(); day++){
+                mMonth.addSelectedDay(new FullDay(mMonth.getYear(), mMonth.getMonth(), day));
+            }
+        }else if(startSelectedRecord.day.getDay() > endSelectedRecord.day.getDay()){
+            for (int day = endSelectedRecord.day.getDay(); day <= startSelectedRecord.day.getDay(); day++){
+                mMonth.addSelectedDay(new FullDay(mMonth.getYear(), mMonth.getMonth(), day));
+            }
+        }
+    }
+
+    public void addSelectedInterval(FullDay day){
+        if (mode == SEGMENT) throw new IllegalArgumentException("Just used with INTERVAL mode!!!");
+        if (day == null) throw new IllegalArgumentException("day can't be null!!!");
+        addSelectedDayToMonth(day);
+    }
+
+    public void addSelectedInterval(List<FullDay> selectedDays){
+        if (mode == SEGMENT) throw new IllegalArgumentException("Just used with INTERVAL mode!!!");
+        if (selectedDays == null) throw new IllegalArgumentException("selectedDays can't be null!!!");
+        for (FullDay day : selectedDays) {
+            addSelectedDayToMonth(day);
+        }
+    }
+
+    protected void addSelectedDayToMonth(FullDay day) {
+        SCMonth comparedMonth = new SCMonth(day.getYear(), day.getMonth());
+        if (mMonth.equals(comparedMonth)){
+            mMonth.addSelectedDay(day);
+            sDays.add(day);
+        }else {
+            throw new IllegalArgumentException("The day not belong to any month!!!");
+        }
+    }
+
 
     public void bind(final MonthView monthView){
         if(monthView == null)

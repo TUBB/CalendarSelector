@@ -24,6 +24,7 @@ import com.tubb.calendarselector.library.CalendarSelector;
 import com.tubb.calendarselector.library.MonthView;
 import com.tubb.calendarselector.library.SegmentSelectListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CalendarSelectorActivity extends AppCompatActivity {
@@ -45,16 +46,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
         ((SimpleItemAnimator) rvCalendar.getItemAnimator()).setSupportsChangeAnimations(false);
         data = getData();
         segmentMode();
-
-        rvCalendar.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                Log.e("sc", recyclerView.computeVerticalScrollOffset()+"");
-                View view = recyclerView.findChildViewUnder(dx, dy);
-                Log.e("sc", view.getTag()+"");
-            }
-        });
-
+//        intervalMode();
     }
 
     /**
@@ -65,6 +57,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
         data = getData();
 
         selector = new CalendarSelector(data, CalendarSelector.SEGMENT);
+        selector.addSelectedSegment(new FullDay(2016, 3, 30), new FullDay(2016, 4, 2));
         selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {
@@ -106,6 +99,14 @@ public class CalendarSelectorActivity extends AppCompatActivity {
     private void intervalMode(){
         data = getData();
         selector = new CalendarSelector(data, CalendarSelector.INTERVAL);
+        selector.addSelectedInterval(new ArrayList<FullDay>(){
+            {
+                add(new FullDay(2016, 2, 4));
+                add(new FullDay(2016, 3, 4));
+                add(new FullDay(2016, 3, 5));
+                add(new FullDay(2016, 4, 4));
+            }
+        });
         selector.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
             public void onIntervalSelect(List<FullDay> selectedDays) {

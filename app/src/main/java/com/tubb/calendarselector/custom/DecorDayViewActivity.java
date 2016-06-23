@@ -42,8 +42,8 @@ public class DecorDayViewActivity extends AppCompatActivity {
     }
 
     private void segmentMode(){
+        selector = new SingleMonthSelector(scMonth, SingleMonthSelector.SEGMENT);
         monthView.setSCMonth(scMonth, new DecorDayViewInflater(this));
-        selector = new SingleMonthSelector(SingleMonthSelector.SEGMENT);
         selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {
@@ -77,8 +77,8 @@ public class DecorDayViewActivity extends AppCompatActivity {
 
     private void intervalMode(){
         scMonth = new SCMonth(2016, 2, SCMonth.SUNDAY_OF_WEEK);
+        selector = new SingleMonthSelector(scMonth, SingleMonthSelector.INTERVAL);
         monthView.setSCMonth(scMonth, new DecorDayViewInflater(this));
-        selector = new SingleMonthSelector(SingleMonthSelector.INTERVAL);
         selector.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
             public void onIntervalSelect(List<FullDay> selectedDays) {
