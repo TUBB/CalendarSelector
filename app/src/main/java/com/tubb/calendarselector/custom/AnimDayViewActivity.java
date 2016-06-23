@@ -44,7 +44,7 @@ public class AnimDayViewActivity extends AppCompatActivity {
     private void segmentMode(){
         scMonth = new SCMonth(2016, 5, SCMonth.SUNDAY_OF_WEEK);
         monthView.setSCMonth(scMonth, new AnimDayViewInflater(this));
-        selector = new SingleMonthSelector(SingleMonthSelector.SEGMENT);
+        selector = new SingleMonthSelector(scMonth, SingleMonthSelector.SEGMENT);
         selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {
@@ -79,7 +79,7 @@ public class AnimDayViewActivity extends AppCompatActivity {
     private void intervalMode(){
         scMonth = new SCMonth(2016, 5, SCMonth.SUNDAY_OF_WEEK);
         monthView.setSCMonth(scMonth, new AnimDayViewInflater(this));
-        selector = new SingleMonthSelector(SingleMonthSelector.INTERVAL);
+        selector = new SingleMonthSelector(scMonth, SingleMonthSelector.INTERVAL);
         selector.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
             public void onIntervalSelect(List<FullDay> selectedDays) {

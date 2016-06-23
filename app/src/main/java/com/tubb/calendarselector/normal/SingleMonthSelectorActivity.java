@@ -43,8 +43,10 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
 
     private void segmentMode(){
         scMonth = new SCMonth(2016, 2, SCMonth.SUNDAY_OF_WEEK);
+
+        selector = new SingleMonthSelector(scMonth, SingleMonthSelector.SEGMENT);
+        selector.addSelectedSegment(new FullDay(2016, 2, 4), new FullDay(2016, 2, 7));
         monthView.setSCMonth(scMonth);
-        selector = new SingleMonthSelector(SingleMonthSelector.SEGMENT);
         selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {
@@ -78,8 +80,11 @@ public class SingleMonthSelectorActivity extends AppCompatActivity {
 
     private void intervalMode(){
         scMonth = new SCMonth(2016, 2, SCMonth.SUNDAY_OF_WEEK);
+        selector = new SingleMonthSelector(scMonth, SingleMonthSelector.INTERVAL);
+        selector.addSelectedInterval(new FullDay(2016, 2, 4));
+        selector.addSelectedInterval(new FullDay(2016, 2, 5));
+        selector.addSelectedInterval(new FullDay(2016, 2, 7));
         monthView.setSCMonth(scMonth);
-        selector = new SingleMonthSelector(SingleMonthSelector.INTERVAL);
         selector.setIntervalSelectListener(new IntervalSelectListener() {
             @Override
             public void onIntervalSelect(List<FullDay> selectedDays) {

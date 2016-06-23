@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -20,8 +21,63 @@ public class CalendarSelector extends SingleMonthSelector {
     protected List<SCMonth> dataList;
 
     public CalendarSelector(List<SCMonth> dataList, @Mode int mode){
-        super(mode);
+        super(null, mode);
         this.dataList = dataList;
+    }
+
+    @Override
+    public void addSelectedSegment(FullDay startDay, FullDay endDay){
+        if (mode == INTERVAL) throw new IllegalArgumentException("Just used with SEGMENT mode!!!");
+        if (startDay == null || endDay == null) throw new IllegalArgumentException("startDay or endDay can't be null");
+        Calendar startCalendar = Calendar.getInstance();
+        Calendar endCalendar = Calendar.getInstance();
+        startCalendar.set(Calendar.YEAR, startDay.getYear());
+        startCalendar.set(Calendar.MONTH, startDay.getMonth() - 1);
+        startCalendar.set(Calendar.DAY_OF_MONTH, startDay.getDay());
+        endCalendar.set(Calendar.YEAR, endDay.getYear());
+        endCalendar.set(Calendar.MONTH, endDay.getMonth() - 1);
+        endCalendar.set(Calendar.DAY_OF_MONTH, endDay.getDay());
+        if (startCalendar.getTime().getTime() > endCalendar.getTime().getTime())
+            throw new IllegalArgumentException("startDay > endDay not support");
+        int startDayPosition = dataList.indexOf(new SCMonth(startDay.getYear(), startDay.getMonth()));
+        int endDayPosition = dataList.indexOf(new SCMonth(endDay.getYear(), endDay.getMonth()));
+        startSelectedRecord = new SelectedRecord();
+        startSelectedRecord.position = startDayPosition;
+        startSelectedRecord.day = startDay;
+
+        endSelectedRecord = new SelectedRecord();
+        endSelectedRecord.position = endDayPosition;
+        endSelectedRecord.day = endDay;
+
+        segmentMonthSelected(null, false);
+    }
+
+    @Override
+    public void addSelectedInterval(FullDay day){
+        if (mode == SEGMENT) throw new IllegalArgumentException("Just used with INTERVAL mode!!!");
+        if (day == null) throw new IllegalArgumentException("day can't be null!!!");
+        addSelectedDayToMonth(day);
+    }
+
+    @Override
+    public void addSelectedInterval(List<FullDay> selectedDays){
+        if (mode == SEGMENT) throw new IllegalArgumentException("Just used with INTERVAL mode!!!");
+        if (selectedDays == null) throw new IllegalArgumentException("selectedDays can't be null!!!");
+        for (FullDay day : selectedDays) {
+            addSelectedDayToMonth(day);
+        }
+    }
+
+    @Override
+    protected void addSelectedDayToMonth(FullDay day) {
+        SCMonth comparedMonth = new SCMonth(day.getYear(), day.getMonth());
+        if (dataList.contains(comparedMonth)){
+            SCMonth sourceMonth = dataList.get(dataList.indexOf(comparedMonth));
+            sourceMonth.addSelectedDay(day);
+            sDays.add(day);
+        }else {
+            throw new IllegalArgumentException("The day not belong to any month!!!");
+        }
     }
 
     public void bind(final ViewGroup container, final MonthView monthView, final int position){
@@ -78,14 +134,14 @@ public class CalendarSelector extends SingleMonthSelector {
                 if(segmentSelectListener.onInterceptSelect(startSelectedRecord.day, ssDay)) return;
                 endSelectedRecord.position = position;
                 endSelectedRecord.day = ssDay;
-                segmentMonthSelected(container);
+                segmentMonthSelected(container, true);
             }else if(startSelectedRecord.position > position){ // click before month
                 if(segmentSelectListener.onInterceptSelect(ssDay, startSelectedRecord.day)) return;
                 endSelectedRecord.position = startSelectedRecord.position;
                 endSelectedRecord.day = startSelectedRecord.day;
                 startSelectedRecord.position = position;
                 startSelectedRecord.day = ssDay;
-                segmentMonthSelected(container);
+                segmentMonthSelected(container, true);
             }else{ // click the same month
                 if(startSelectedRecord.day.getDay() != ssDay.getDay()){
                     if(startSelectedRecord.day.getDay() < ssDay.getDay()){
@@ -144,15 +200,13 @@ public class CalendarSelector extends SingleMonthSelector {
 
     private void invalidate(ViewGroup container, int position){
         if(position >= 0) {
-            View childView = container.getChildAt(position);
-            if(childView == null){
-                if(container instanceof RecyclerView){
-                    RecyclerView rv = (RecyclerView)container;
-                    rv.getAdapter().notifyItemChanged(position);
-                }else{
-                    Log.e(TAG, "the container view is not expected ViewGroup");
-                }
-            }else{
+            if (container instanceof RecyclerView){
+                RecyclerView rv = (RecyclerView)container;
+                rv.getAdapter().notifyItemChanged(position);
+            }else if (container instanceof ListView){
+                Log.e(TAG, "The ListView not support yet!!!");
+            }else {
+                View childView = container.getChildAt(position);
                 List<View> unvisited = new ArrayList<>();
                 unvisited.add(childView);
                 while (!unvisited.isEmpty()) {
@@ -170,17 +224,19 @@ public class CalendarSelector extends SingleMonthSelector {
                     for (int i=0; i<childCount; i++) unvisited.add(group.getChildAt(i));
                 }
             }
+        }else {
+            throw new IllegalArgumentException("Invalid position!!!");
         }
     }
 
-    private void segmentMonthSelected(ViewGroup container) {
+    private void segmentMonthSelected(ViewGroup container, boolean shouldRefreshView) {
 
         SCMonth startMonth = dataList.get(startSelectedRecord.position);
         int startSelectedMonthDayCount = SCDateUtils.getDayCountOfMonth(startMonth.getYear(), startMonth.getMonth());
         for (int day = startSelectedRecord.day.getDay(); day <= startSelectedMonthDayCount; day++){
             startMonth.addSelectedDay(new FullDay(startMonth.getYear(), startMonth.getMonth(), day));
         }
-        invalidate(container, startSelectedRecord.position);
+        if (shouldRefreshView) invalidate(container, startSelectedRecord.position);
 
         int startSelectedPosition = startSelectedRecord.position;
         int endSelectedPosition = endSelectedRecord.position;
@@ -192,16 +248,16 @@ public class CalendarSelector extends SingleMonthSelector {
             for (int day = 1; day <= segmentSelectedMonthDayCount; day++) {
                 segmentMonth.addSelectedDay(new FullDay(segmentMonth.getYear(), segmentMonth.getMonth(), day));
             }
-            invalidate(container, startSelectedPosition);
+            if (shouldRefreshView) invalidate(container, startSelectedPosition);
         }
 
         SCMonth endMonth = dataList.get(endSelectedRecord.position);
         for (int day = 1; day <= endSelectedRecord.day.getDay(); day++){
             endMonth.addSelectedDay(new FullDay(endMonth.getYear(), endMonth.getMonth(), day));
         }
-        invalidate(container, endSelectedRecord.position);
+        if (shouldRefreshView) invalidate(container, endSelectedRecord.position);
 
-        segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
+        if (shouldRefreshView) segmentSelectListener.onSegmentSelect(startSelectedRecord.day, endSelectedRecord.day);
     }
 
     /**
