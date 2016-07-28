@@ -19,8 +19,8 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
-        versionCode 17
-        versionName "0.1.7"
+        versionCode 18
+        versionName "0.1.8"
     }
     buildTypes {
         release {
@@ -32,15 +32,15 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:'+rootProject.appcompatVersion
-    compile 'com.android.support:recyclerview-v7:'+rootProject.appcompatVersion
+    provided 'com.android.support:appcompat-v7:'+rootProject.appcompatVersion
+    provided 'com.android.support:recyclerview-v7:'+rootProject.appcompatVersion
 }
 
 publish {
     userOrg = 'tubb'
     groupId = 'com.tubb.calendarselector.library'
     artifactId = 'calendar-selector'
-    publishVersion = '0.1.7'
+    publishVersion = '0.1.8'
     desc = 'A calender selector'
     website = 'https://github.com/TUBB/CalendarSelector'
 }
