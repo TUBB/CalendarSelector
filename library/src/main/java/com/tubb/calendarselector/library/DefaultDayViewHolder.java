@@ -1,5 +1,6 @@
 package com.tubb.calendarselector.library;
 
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
@@ -20,8 +21,18 @@ public final class DefaultDayViewHolder extends DayViewHolder {
     public DefaultDayViewHolder(View dayView) {
         super(dayView);
         tvDay = (TextView) dayView.findViewById(R.id.tvDay);
-        mPrevMonthDayTextColor = ContextCompat.getColor(mContext, R.color.c_999999);
-        mNextMonthDayTextColor = ContextCompat.getColor(mContext, R.color.c_999999);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mPrevMonthDayTextColor = ContextCompat.getColor(mContext, R.color.c_999999);
+        } else {
+            mPrevMonthDayTextColor = mContext.getResources().getColor(R.color.c_999999);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mNextMonthDayTextColor = ContextCompat.getColor(mContext, R.color.c_999999);
+        } else {
+            mNextMonthDayTextColor = mContext.getResources().getColor(R.color.c_999999);
+        }
     }
 
     @Override

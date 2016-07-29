@@ -95,7 +95,7 @@ public class MonthView extends FrameLayout{
             });
         }
         // when use in the recyclerview, each item's height may be different, we should requestLayout again
-        if(neededRelayout) {
+        if (neededRelayout) {
             requestLayout();
             neededRelayout = false;
         }

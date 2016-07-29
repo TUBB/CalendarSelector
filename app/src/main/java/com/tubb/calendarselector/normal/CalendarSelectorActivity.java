@@ -57,7 +57,7 @@ public class CalendarSelectorActivity extends AppCompatActivity {
         data = getData();
 
         selector = new CalendarSelector(data, CalendarSelector.SEGMENT);
-        selector.addSelectedSegment(new FullDay(2016, 3, 30), new FullDay(2016, 4, 2));
+        selector.addSelectedSegment(new FullDay(2016, 3, 10), new FullDay(2016, 4, 1));
         selector.setSegmentSelectListener(new SegmentSelectListener() {
             @Override
             public void onSegmentSelect(FullDay startDay, FullDay endDay) {

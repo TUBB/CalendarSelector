@@ -231,6 +231,26 @@ public class CalendarSelector extends SingleMonthSelector {
 
     private void segmentMonthSelected(ViewGroup container, boolean shouldRefreshView) {
 
+        if (container == null
+                && !shouldRefreshView
+                && startSelectedRecord.position == endSelectedRecord.position) {
+            SCMonth targetMonth = dataList.get(startSelectedRecord.position);
+            if(startSelectedRecord.day.getDay() != endSelectedRecord.day.getDay()){
+                if(startSelectedRecord.day.getDay() < endSelectedRecord.day.getDay()){
+                    for (int day = startSelectedRecord.day.getDay(); day <= endSelectedRecord.day.getDay(); day++){
+                        targetMonth.addSelectedDay(new FullDay(targetMonth.getYear(), targetMonth.getMonth(), day));
+                    }
+                }else if(startSelectedRecord.day.getDay() > endSelectedRecord.day.getDay()){
+                    for (int day = endSelectedRecord.day.getDay(); day <= startSelectedRecord.day.getDay(); day++){
+                        targetMonth.addSelectedDay(new FullDay(targetMonth.getYear(), targetMonth.getMonth(), day));
+                    }
+                }
+            }else{
+                targetMonth.addSelectedDay(startSelectedRecord.day);
+            }
+            return;
+        }
+
         SCMonth startMonth = dataList.get(startSelectedRecord.position);
         int startSelectedMonthDayCount = SCDateUtils.getDayCountOfMonth(startMonth.getYear(), startMonth.getMonth());
         for (int day = startSelectedRecord.day.getDay(); day <= startSelectedMonthDayCount; day++){

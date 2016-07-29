@@ -3,6 +3,7 @@ package com.tubb.calendarselector.library;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,11 @@ public final class DefaultDayViewInflater extends DayViewInflater {
         super(context);
         mDecorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mDecorWidth = dip2px(mContext, 0.5f);
-        mDecorPaint.setColor(ContextCompat.getColor(mContext, R.color.c_dddddd));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mDecorPaint.setColor(ContextCompat.getColor(mContext, R.color.c_dddddd));
+        } else {
+            mDecorPaint.setColor(context.getResources().getColor(R.color.c_dddddd));
+        }
         mDecorPaint.setStrokeWidth(mDecorWidth);
     }
 
