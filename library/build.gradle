@@ -19,8 +19,8 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
-        versionCode 21
-        versionName "0.2.1"
+        versionCode 23
+        versionName "0.2.3"
     }
     buildTypes {
         release {
@@ -40,7 +40,7 @@ publish {
     userOrg = 'tubb'
     groupId = 'com.tubb.calendarselector.library'
     artifactId = 'calendar-selector'
-    publishVersion = '0.2.1'
+    publishVersion = '0.2.3'
     desc = 'A calender selector'
     website = 'https://github.com/TUBB/CalendarSelector'
 }

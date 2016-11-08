@@ -27,7 +27,7 @@ Usage
 Add to dependencies
 
 ```groovy
-compile 'com.tubb.calendarselector.library:calendar-selector:0.2.1'
+compile 'com.tubb.calendarselector.library:calendar-selector:0.2.3'
 ```
 
 Just use [MonthView][1], [MonthView][1] is a custom view for display month's days

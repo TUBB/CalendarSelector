@@ -73,8 +73,8 @@ public class CalendarSelector extends SingleMonthSelector {
         SCMonth comparedMonth = new SCMonth(day.getYear(), day.getMonth());
         if (dataList.contains(comparedMonth)){
             SCMonth sourceMonth = dataList.get(dataList.indexOf(comparedMonth));
-            sourceMonth.addSelectedDay(day);
             sDays.add(day);
+            sourceMonth.addSelectedDay(day);
         }else {
             throw new IllegalArgumentException("The day not belong to any month!!!");
         }
